@@ -52,11 +52,39 @@ class ProductController extends Controller
                     });
                 });
             })
+
+            // ✅ FILTERS (ADDED)
+            ->when($request->author_id, function ($q) use ($request) {
+                $q->where('author_id', $request->author_id);
+            })
+            ->when($request->language_id, function ($q) use ($request) {
+                $q->where('language_id', $request->language_id);
+            })
+            ->when($request->category_id, function ($q) use ($request) {
+                $q->where('category_id', $request->category_id);
+            })
+            ->when($request->rack_no, function ($q) use ($request) {
+                $q->where('rack_no', $request->rack_no);
+            })
+
             ->paginate(10)
             ->withQueryString();
 
-        return view('products.index', compact('products'));
+        // ✅ FILTER DATA (ADDED)
+        return view('products.index', [
+            'products'   => $products,
+            'authors'    => Author::orderBy('name')->get(),
+            'languages'  => Language::orderBy('name')->get(),
+            'categories' => Category::orderBy('name')->get(),
+            'racks' => Product::whereNotNull('rack_no')
+                ->select('rack_no')
+                ->distinct()
+                ->orderBy('rack_no')
+                ->pluck('rack_no')
+                ->map(fn($rack) => trim((string) $rack)),
+        ]);
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -110,7 +138,8 @@ class ProductController extends Controller
                 'book_name'         => 'required|string|max:255',
                 'isbn'              => 'nullable|string|max:255',
                 'edition'           => 'nullable|string|max:50',
-                'book_pages'        => 'nullable|integer',
+                // 'book_pages'        => 'nullable|integer',
+                'book_pages' => 'required|numeric|min:0',
                 'barcode_no'        => 'nullable|string|max:255',
                 'author_id'         => 'required|exists:authors,id',
                 'publication_id'    => 'required|exists:publications,id',
@@ -192,7 +221,7 @@ class ProductController extends Controller
             'book_name'            => ['required', 'string', 'max:255'],
             'isbn'                 => ['nullable', 'string', 'max:100'],
             'edition'              => ['nullable', 'integer', 'min:1'],
-            'book_pages'           => ['required', 'integer', 'min:1'],
+            'book_pages'           => ['required', 'numeric', 'min:0'],
             'barcode_no'           => ['nullable', 'string', 'max:100'],
             'mrp'                  => ['required', 'numeric', 'min:0'],
             'disc_from_company'    => ['nullable', 'numeric', 'min:0', 'max:100'],

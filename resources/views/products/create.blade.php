@@ -38,7 +38,7 @@
                     {{-- Book Pages --}}
                     <div>
                         <label class="label">Book Pages</label>
-                        <input type="number" name="book_pages" class="input input-bordered w-full"
+                        <input type="number" name="book_pages" step="0.01" class="input input-bordered w-full"
                             value="{{ old('book_pages') }}" placeholder="Total pages" required />
                     </div>
 

@@ -43,4 +43,8 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    protected $casts = [
+        'book_pages' => 'decimal:2',
+    ];
 }

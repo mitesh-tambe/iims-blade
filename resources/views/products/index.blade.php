@@ -13,6 +13,68 @@
             </a>
         </div>
 
+        {{-- 🎯 Filters --}}
+        <form method="GET" action="{{ route('products.index') }}" id="filterForm"
+            class="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-4">
+
+            {{-- Preserve search --}}
+            @if (request('search'))
+                <input type="hidden" name="search" value="{{ request('search') }}">
+            @endif
+
+            {{-- Author --}}
+            <select name="author_id" class="select select-bordered w-full" onchange="submitFilters()">
+                <option value="">All Authors</option>
+                @foreach ($authors as $author)
+                    <option value="{{ $author->id }}" {{ request('author_id') == $author->id ? 'selected' : '' }}>
+                        {{ $author->name }}
+                    </option>
+                @endforeach
+            </select>
+
+            {{-- Language --}}
+            <select name="language_id" class="select select-bordered w-full" onchange="submitFilters()">
+                <option value="">All Languages</option>
+                @foreach ($languages as $language)
+                    <option value="{{ $language->id }}" {{ request('language_id') == $language->id ? 'selected' : '' }}>
+                        {{ $language->name }}
+                    </option>
+                @endforeach
+            </select>
+
+            {{-- Category --}}
+            <select name="category_id" class="select select-bordered w-full" onchange="submitFilters()">
+                <option value="">All Categories</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category->id }}"
+                        {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                        {{ $category->name }}
+                    </option>
+                @endforeach
+            </select>
+
+            {{-- Rack --}}
+            <select name="rack_no" class="select select-bordered w-full" onchange="submitFilters()">
+                <option value="">All Racks</option>
+                @foreach ($racks as $rack)
+                    <option value="{{ $rack }}" {{ request('rack_no') == $rack ? 'selected' : '' }}>
+                        {{ $rack }}
+                    </option>
+                @endforeach
+            </select>
+        </form>
+
+        @php
+            $hasFilters = request()->except('page') !== [];
+        @endphp
+
+        <div class="flex justify-end mt-3">
+            <a href="{{ route('products.index') }}"
+                class="btn btn-outline btn-sm {{ !$hasFilters ? 'btn-disabled' : '' }}">
+                Clear Filters
+            </a>
+        </div>
+
         {{-- 📋 Products Table --}}
         <table class="table">
             <thead>
@@ -135,6 +197,12 @@
 
             // OPEN MODAL
             view_product.showModal();
+        }
+    </script>
+
+    <script>
+        function submitFilters() {
+            document.getElementById('filterForm').submit();
         }
     </script>
 
