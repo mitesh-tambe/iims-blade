@@ -63,7 +63,7 @@ class ProductController extends Controller
             ->when($request->category_id, function ($q) use ($request) {
                 $q->where('category_id', $request->category_id);
             })
-            ->when($request->rack_no, function ($q) use ($request) {
+            ->when($request->has('rack_no'), function ($q) use ($request) {
                 $q->where('rack_no', $request->rack_no);
             })
 
@@ -139,7 +139,7 @@ class ProductController extends Controller
                 'isbn'              => 'nullable|string|max:255',
                 'edition'           => 'nullable|string|max:50',
                 // 'book_pages'        => 'nullable|integer',
-                'book_pages' => 'required|sting|max:10',
+                'book_pages' => 'required|string|max:10',
                 'barcode_no'        => 'nullable|string|max:255',
                 'author_id'         => 'required|exists:authors,id',
                 'publication_id'    => 'required|exists:publications,id',
