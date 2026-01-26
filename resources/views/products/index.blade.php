@@ -32,12 +32,12 @@
                 @endforeach
             </select>
 
-            {{-- Language --}}
-            <select name="language_id" class="select select-bordered w-full" onchange="submitFilters()">
-                <option value="">All Languages</option>
-                @foreach ($languages as $language)
-                    <option value="{{ $language->id }}" {{ request('language_id') == $language->id ? 'selected' : '' }}>
-                        {{ $language->name }}
+            {{-- Publication --}}
+            <select name="publication_id" class="select select-bordered w-full" onchange="submitFilters()">
+                <option value="">All Publications</option>
+                @foreach ($publications as $publication)
+                    <option value="{{ $publication->id }}" {{ request('publication_id') == $publication->id ? 'selected' : '' }}>
+                        {{ $publication->name }}
                     </option>
                 @endforeach
             </select>

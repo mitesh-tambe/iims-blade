@@ -57,8 +57,8 @@ class ProductController extends Controller
             ->when($request->author_id, function ($q) use ($request) {
                 $q->where('author_id', $request->author_id);
             })
-            ->when($request->language_id, function ($q) use ($request) {
-                $q->where('language_id', $request->language_id);
+            ->when($request->publication_id, function ($q) use ($request) {
+                $q->where('publication_id', $request->publication_id);
             })
             ->when($request->category_id, function ($q) use ($request) {
                 $q->where('category_id', $request->category_id);
@@ -74,7 +74,7 @@ class ProductController extends Controller
         return view('products.index', [
             'products'   => $products,
             'authors'    => Author::orderBy('name')->get(),
-            'languages'  => Language::orderBy('name')->get(),
+            'publications'  => Publication::orderBy('name')->get(),
             'categories' => Category::orderBy('name')->get(),
             'racks' => Product::whereNotNull('rack_no')
                 ->select('rack_no')
@@ -139,14 +139,13 @@ class ProductController extends Controller
                 'isbn'              => 'nullable|string|max:255',
                 'edition'           => 'nullable|string|max:50',
                 // 'book_pages'        => 'nullable|integer',
-                'book_pages' => 'required|numeric|min:0',
+                'book_pages' => 'required|sting|max:10',
                 'barcode_no'        => 'nullable|string|max:255',
                 'author_id'         => 'required|exists:authors,id',
                 'publication_id'    => 'required|exists:publications,id',
                 'language_id'       => 'required|exists:languages,id',
                 'category_id'       => 'required|exists:categories,id',
                 'mrp'               => 'required|numeric|min:0',
-
                 'disc_from_company' => 'nullable|numeric|min:0|max:100',
                 'disc_for_customer' => 'nullable|numeric|min:0|max:100|lte:disc_from_company',
                 'rack_no'          => 'required|string|max:100',
@@ -221,7 +220,7 @@ class ProductController extends Controller
             'book_name'            => ['required', 'string', 'max:255'],
             'isbn'                 => ['nullable', 'string', 'max:100'],
             'edition'              => ['nullable', 'integer', 'min:1'],
-            'book_pages'           => ['required', 'numeric', 'min:0'],
+            'book_pages'           => ['required', 'string', 'max:10'],
             'barcode_no'           => ['nullable', 'string', 'max:100'],
             'mrp'                  => ['required', 'numeric', 'min:0'],
             'disc_from_company'    => ['nullable', 'numeric', 'min:0', 'max:100'],
