@@ -18,65 +18,28 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->search;
-
         $products = Product::with([
             'author',
             'publication',
             'language',
             'category'
         ])
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-
-                    // Product fields
-                    $q->where('book_name', 'like', "%{$search}%")
-                        ->orWhere('isbn', 'like', "%{$search}%")
-                        ->orWhere('barcode_no', 'like', "%{$search}%");
-
-                    // Relations
-                    $q->orWhereHas('author', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    });
-
-                    $q->orWhereHas('publication', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    });
-
-                    $q->orWhereHas('language', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    });
-
-                    $q->orWhereHas('category', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    });
-                });
-            })
-
-            // ✅ FILTERS (ADDED)
-            ->when($request->author_id, function ($q) use ($request) {
-                $q->where('author_id', $request->author_id);
-            })
-            ->when($request->publication_id, function ($q) use ($request) {
-                $q->where('publication_id', $request->publication_id);
-            })
-            ->when($request->category_id, function ($q) use ($request) {
-                $q->where('category_id', $request->category_id);
-            })
-            ->when($request->has('rack_no'), function ($q) use ($request) {
-                $q->where('rack_no', $request->rack_no);
-            })
-
+            ->filter($request->only([
+                'search',
+                'author_id',
+                'publication_id',
+                'category_id',
+                'rack_no',
+            ]))
             ->paginate(10)
             ->withQueryString();
 
-        // ✅ FILTER DATA (ADDED)
         return view('products.index', [
-            'products'   => $products,
-            'authors'    => Author::orderBy('name')->get(),
+            'products'      => $products,
+            'authors'       => Author::orderBy('name')->get(),
             'publications'  => Publication::orderBy('name')->get(),
-            'categories' => Category::orderBy('name')->get(),
-            'racks' => Product::whereNotNull('rack_no')
+            'categories'    => Category::orderBy('name')->get(),
+            'racks'         => Product::whereNotNull('rack_no')
                 ->select('rack_no')
                 ->distinct()
                 ->orderBy('rack_no')
