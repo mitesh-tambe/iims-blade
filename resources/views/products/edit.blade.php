@@ -16,8 +16,8 @@
                     <div>
                         <label class="label">Book Name</label>
                         <input type="text" name="book_name" class="input input-bordered w-full"
-                            value="{{ old('book_name', $product->book_name) }}"
-                            placeholder="Enter book name" required />
+                            value="{{ old('book_name', $product->book_name) }}" placeholder="Enter book name"
+                            required />
                         @error('book_name')
                             <p class="text-error text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -27,40 +27,35 @@
                     <div>
                         <label class="label">ISBN</label>
                         <input type="text" name="isbn" class="input input-bordered w-full"
-                            value="{{ old('isbn', $product->isbn) }}"
-                            placeholder="ISBN number" />
+                            value="{{ old('isbn', $product->isbn) }}" placeholder="ISBN number" />
                     </div>
 
                     {{-- Edition --}}
                     <div>
                         <label class="label">Edition</label>
                         <input type="number" name="edition" class="input input-bordered w-full"
-                            value="{{ old('edition', $product->edition) }}"
-                            placeholder="Edition (optional)" />
+                            value="{{ old('edition', $product->edition) }}" placeholder="Edition (optional)" />
                     </div>
 
                     {{-- Book Pages --}}
                     <div>
                         <label class="label">Book Pages</label>
-                        <input type="number" step="0.01" name="book_pages" class="input input-bordered w-full"
-                            value="{{ old('book_pages', $product->book_pages) }}"
-                            placeholder="Total pages" required />
+                        <input type="text" name="book_pages" class="input input-bordered w-full"
+                            value="{{ old('book_pages', $product->book_pages) }}" placeholder="Total pages" required />
                     </div>
 
                     {{-- Barcode --}}
                     <div>
                         <label class="label">Barcode No</label>
                         <input type="text" name="barcode_no" class="input input-bordered w-full"
-                            value="{{ old('barcode_no', $product->barcode_no) }}"
-                            placeholder="Barcode number" />
+                            value="{{ old('barcode_no', $product->barcode_no) }}" placeholder="Barcode number" />
                     </div>
 
                     {{-- MRP --}}
                     <div>
                         <label class="label">MRP</label>
                         <input type="number" name="mrp" class="input input-bordered w-full"
-                            value="{{ old('mrp', $product->mrp) }}"
-                            placeholder="MRP" required />
+                            value="{{ old('mrp', $product->mrp) }}" placeholder="MRP" required />
                     </div>
                 </div>
 
@@ -71,34 +66,28 @@
                     <div>
                         <label class="label">Disc % (Company)</label>
                         <input type="number" name="disc_from_company" class="input input-bordered w-full"
-                            value="{{ old('disc_from_company', $product->disc_from_company) }}"
-                            placeholder="%" />
+                            value="{{ old('disc_from_company', $product->disc_from_company) }}" placeholder="%" />
                     </div>
 
                     {{-- Amt Company --}}
                     <div>
                         <label class="label">Amt</label>
-                        <input type="number" name="amt_company"
-                            class="input input-bordered w-full bg-base-200"
-                            value="{{ old('amt_company', $product->amt_company) }}"
-                            placeholder="Amt" />
+                        <input type="number" name="amt_company" class="input input-bordered w-full bg-base-200"
+                            value="{{ old('amt_company', $product->amt_company) }}" placeholder="Amt" />
                     </div>
 
                     {{-- Disc % Customer --}}
                     <div>
                         <label class="label">Disc % (Customer)</label>
                         <input type="number" name="disc_for_customer" class="input input-bordered w-full"
-                            value="{{ old('disc_for_customer', $product->disc_for_customer) }}"
-                            placeholder="%" />
+                            value="{{ old('disc_for_customer', $product->disc_for_customer) }}" placeholder="%" />
                     </div>
 
                     {{-- Amt Customer --}}
                     <div>
                         <label class="label">Amt</label>
-                        <input type="number" name="amt_customer"
-                            class="input input-bordered w-full bg-base-200"
-                            value="{{ old('amt_customer', $product->amt_customer) }}"
-                            placeholder="Amt" />
+                        <input type="number" name="amt_customer" class="input input-bordered w-full bg-base-200"
+                            value="{{ old('amt_customer', $product->amt_customer) }}" placeholder="Amt" />
                     </div>
 
                 </div>
@@ -128,7 +117,8 @@
                 <div>
                     <label class="label">Publication</label>
                     <div class="grid grid-cols-2 gap-2">
-                        <select name="publication_id" id="publicationSelect" class="select select-bordered w-full" required>
+                        <select name="publication_id" id="publicationSelect" class="select select-bordered w-full"
+                            required>
                             <option value="">Select Publication</option>
                             @foreach ($publications as $publication)
                                 <option value="{{ $publication->id }}"
@@ -195,6 +185,10 @@
                             value="{{ old('rack_no', $product->rack_no) }}" placeholder="Rack Number" required />
                     </div>
                 </div>
+
+                @foreach (request()->only(['search', 'filter_author_id', 'filter_publication_id', 'filter_category_id', 'filter_rack_no', 'page']) as $key => $value)
+                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endforeach
 
                 {{-- SUBMIT --}}
                 <div class="pt-4">

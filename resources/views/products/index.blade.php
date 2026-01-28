@@ -36,7 +36,8 @@
             <select name="publication_id" class="select select-bordered w-full" onchange="submitFilters()">
                 <option value="">All Publications</option>
                 @foreach ($publications as $publication)
-                    <option value="{{ $publication->id }}" {{ request('publication_id') == $publication->id ? 'selected' : '' }}>
+                    <option value="{{ $publication->id }}"
+                        {{ request('publication_id') == $publication->id ? 'selected' : '' }}>
                         {{ $publication->name }}
                     </option>
                 @endforeach
@@ -66,6 +67,14 @@
 
         @php
             $hasFilters = request()->except('page') !== [];
+
+            // 🔥 BUILD FILTER_* PARAMS (THIS IS THE FIX)
+            $filterParams = [];
+            foreach (['search', 'author_id', 'publication_id', 'category_id', 'rack_no', 'page'] as $key) {
+                if (request()->filled($key)) {
+                    $filterParams['filter_' . $key] = request($key);
+                }
+            }
         @endphp
 
         <div class="flex justify-end mt-3">
@@ -123,12 +132,15 @@
                             </button>
 
                             {{-- ✏️ Edit --}}
-                            <a href="{{ route('products.edit', $product->id) }}" class="btn btn-xs btn-warning">
+                            <a href="{{ route('products.edit', array_merge(['product' => $product->id], $filterParams)) }}"
+                                class="btn btn-xs btn-warning">
                                 <i class="fa-solid fa-pencil"></i>
                             </a>
 
                             {{-- ❌ Delete --}}
-                            <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="inline"
+                            <form
+                                action="{{ route('products.destroy', array_merge(['product' => $product->id], $filterParams)) }}"
+                                method="POST" class="inline"
                                 onsubmit="return confirm('Are you sure you want to delete this product?')">
                                 @csrf
                                 @method('DELETE')

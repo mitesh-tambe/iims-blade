@@ -230,8 +230,26 @@ class ProductController extends Controller
             ]);
         });
 
+        $filters = [];
+
+        // Map filter_* back to index filters
+        $map = [
+            'filter_search'          => 'search',
+            'filter_author_id'       => 'author_id',
+            'filter_publication_id'  => 'publication_id',
+            'filter_category_id'     => 'category_id',
+            'filter_rack_no'         => 'rack_no',
+            'page'                   => 'page',
+        ];
+
+        foreach ($map as $from => $to) {
+            if ($request->filled($from)) {
+                $filters[$to] = $request->input($from);
+            }
+        }
+        
         return redirect()
-            ->route('products.index')
+            ->route('products.index', $filters)
             ->with('success', 'Product updated successfully.');
     }
 
@@ -244,7 +262,7 @@ class ProductController extends Controller
         $product->delete();
 
         return redirect()
-            ->route('products.index')
+            ->route('products.index', request()->query())
             ->with('success', 'Product deleted successfully.');
     }
 }
