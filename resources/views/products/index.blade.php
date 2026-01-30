@@ -1,4 +1,17 @@
 <x-app-layout>
+
+    @php
+        $hasFilters = request()->except('page') !== [];
+
+        // 🔥 BUILD FILTER_* PARAMS (THIS IS THE FIX)
+        $filterParams = [];
+        foreach (['search', 'author_id', 'publication_id', 'category_id', 'rack_no', 'page'] as $key) {
+            if (request()->filled($key)) {
+                $filterParams['filter_' . $key] = request($key);
+            }
+        }
+    @endphp
+
     <div class="overflow-x-auto space-y-4">
 
         {{-- 🔝 Top Bar --}}
@@ -63,26 +76,42 @@
                     </option>
                 @endforeach
             </select>
+
+            {{-- 🔢 Per Page + Clear --}}
+            <div class="flex justify-between items-center col-span-full mt-2">
+
+                <!-- Per Page -->
+                <div class="flex items-center gap-2">
+                    <label class="text-sm text-gray-600">Show</label>
+
+                    <select name="per_page" class="border rounded-md px-3 py-1 text-sm focus:ring focus:ring-indigo-200"
+                        onchange="submitFilters()">
+                        @foreach ([10, 25, 50, 100] as $size)
+                            <option value="{{ $size }}" @selected(request('per_page', 10) == $size)>
+                                {{ $size }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <span class="text-sm text-gray-600">entries</span>
+                </div>
+
+                <div>
+                    <a href="{{ route('products.export', request()->query()) }}"
+                        class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
+                        Export
+                    </a>
+
+                    <a href="{{ route('products.index') }}"
+                        class="btn btn-outline btn-sm {{ !$hasFilters ? 'btn-disabled' : '' }}">
+                        Clear Filters
+                    </a>
+                </div>
+
+
+            </div>
+
         </form>
-
-        @php
-            $hasFilters = request()->except('page') !== [];
-
-            // 🔥 BUILD FILTER_* PARAMS (THIS IS THE FIX)
-            $filterParams = [];
-            foreach (['search', 'author_id', 'publication_id', 'category_id', 'rack_no', 'page'] as $key) {
-                if (request()->filled($key)) {
-                    $filterParams['filter_' . $key] = request($key);
-                }
-            }
-        @endphp
-
-        <div class="flex justify-end mt-3">
-            <a href="{{ route('products.index') }}"
-                class="btn btn-outline btn-sm {{ !$hasFilters ? 'btn-disabled' : '' }}">
-                Clear Filters
-            </a>
-        </div>
 
         {{-- 📋 Products Table --}}
         <table class="table">
@@ -161,8 +190,45 @@
         </table>
 
         {{-- 📄 Pagination --}}
-        <div class="pt-4">
+        {{-- <div class="pt-4">
             {{ $products->links() }}
+        </div> --}}
+
+        {{-- 📄 Pagination --}}
+        <div class="pt-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+
+            <!-- Pagination (no wrap) -->
+            <div class="overflow-x-auto">
+                <div class="whitespace-nowrap">
+                    {{ $products->links() }}
+                </div>
+            </div>
+
+            <!-- Go To Page -->
+            <form method="GET" action="{{ route('products.index') }}"
+                class="flex items-center gap-2 text-sm shrink-0">
+
+                {{-- Preserve existing query params --}}
+                @foreach (request()->except('page') as $key => $value)
+                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endforeach
+
+                <label class="text-gray-600 whitespace-nowrap">
+                    Go to page
+                </label>
+
+                <input type="number" name="page" min="1" max="{{ $products->lastPage() }}"
+                    value="{{ $products->currentPage() }}" class="w-20 border rounded px-2 py-1 text-sm" required>
+
+                <button type="submit" class="btn btn-sm btn-outline">
+                    Go
+                </button>
+
+                <span class="text-gray-500 whitespace-nowrap">
+                    / {{ $products->lastPage() }}
+                </span>
+
+            </form>
         </div>
 
     </div>

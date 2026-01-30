@@ -10,6 +10,7 @@ use App\Models\Publication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Spatie\SimpleExcel\SimpleExcelWriter;
 
 class ProductController extends Controller
 {
@@ -18,6 +19,14 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
+        $allowedPerPage = [10, 25, 50, 100];
+
+        $perPage = (int) $request->get('per_page', 10);
+
+        if (! in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
+        }
+
         $products = Product::with([
             'author',
             'publication',
@@ -31,7 +40,7 @@ class ProductController extends Controller
                 'category_id',
                 'rack_no',
             ]))
-            ->paginate(10)
+            ->paginate($perPage)
             ->withQueryString();
 
         return view('products.index', [
@@ -45,6 +54,7 @@ class ProductController extends Controller
                 ->orderBy('rack_no')
                 ->pluck('rack_no')
                 ->map(fn($rack) => trim((string) $rack)),
+            'perPage' => $perPage,
         ]);
     }
 
@@ -247,7 +257,7 @@ class ProductController extends Controller
                 $filters[$to] = $request->input($from);
             }
         }
-        
+
         return redirect()
             ->route('products.index', $filters)
             ->with('success', 'Product updated successfully.');
@@ -264,5 +274,49 @@ class ProductController extends Controller
         return redirect()
             ->route('products.index', request()->query())
             ->with('success', 'Product deleted successfully.');
+    }
+
+
+    public function export(Request $request)
+    {
+        $fileName = 'products_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+
+        return response()->streamDownload(function () use ($request) {
+
+            $writer = SimpleExcelWriter::streamDownload('products.xlsx');
+
+            Product::with(['author', 'publication', 'language', 'category'])
+                ->filter($request->all())
+                ->orderBy('id')
+                ->chunk(500, function ($products) use ($writer) {
+
+                    foreach ($products as $product) {
+                        $writer->addRow([
+                            'ID' => $product->id,
+                            'Book Name' => $product->book_name,
+                            'ISBN' => $product->isbn,
+                            'Edition' => $product->edition,
+                            'Pages' => $product->book_pages,
+                            'Barcode' => $product->barcode_no,
+
+                            'Author' => $product->author?->name,
+                            'Publication' => $product->publication?->name,
+                            'Language' => $product->language?->name,
+                            'Category' => $product->category?->name,
+
+                            'MRP' => $product->mrp,
+                            'Company Discount' => $product->disc_from_company,
+                            'Customer Discount' => $product->disc_for_customer,
+                            'Company Amount' => $product->amt_company,
+                            'Customer Amount' => $product->amt_customer,
+
+                            'Rack No' => $product->rack_no,
+                            'Created At' => $product->created_at?->format('Y-m-d'),
+                        ]);
+                    }
+                });
+
+            $writer->close();
+        }, $fileName);
     }
 }

@@ -20,12 +20,14 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::get('/products/export', [ProductController::class, 'export'])
+        ->name('products.export');
+        
     Route::resource('products', ProductController::class);
     Route::resource('authors', AuthorController::class);
     Route::resource('categories', CategoryController::class);
     Route::resource('publications', PublicationController::class);
     Route::resource('languages', LanguageController::class);
-
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
