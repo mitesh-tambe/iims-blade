@@ -39,6 +39,10 @@ document.addEventListener('category-created', e => {
     appendAndSelect('categorySelect', e.detail);
 });
 
+// rack created 
+document.addEventListener('rack-created', e => {
+    appendAndSelect('rackSelect', e.detail);
+});
 
 window.showToast = function (message, type = 'success') {
     const toast = document.getElementById('toast');

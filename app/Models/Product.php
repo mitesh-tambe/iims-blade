@@ -23,6 +23,7 @@ class Product extends Model
         'amt_company',
         'amt_customer',
         'rack_no',
+        'rack_id',
     ];
 
     public function author()
@@ -43,6 +44,11 @@ class Product extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function rack()
+    {
+        return $this->belongsTo(Rack::class);
     }
 
     public function scopeFilter(Builder $query, array $filters): Builder
