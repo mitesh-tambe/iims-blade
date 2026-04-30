@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Language;
 use App\Models\Product;
 use App\Models\Publication;
+use App\Models\Rack;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -31,14 +32,15 @@ class ProductController extends Controller
             'author',
             'publication',
             'language',
-            'category'
+            'category',
+            'rack' // ✅ added
         ])
             ->filter($request->only([
                 'search',
                 'author_id',
                 'publication_id',
                 'category_id',
-                'rack_no',
+                'rack_id',
             ]))
             ->paginate($perPage)
             ->withQueryString();
@@ -48,12 +50,12 @@ class ProductController extends Controller
             'authors'       => Author::orderBy('name')->get(),
             'publications'  => Publication::orderBy('name')->get(),
             'categories'    => Category::orderBy('name')->get(),
-            'racks'         => Product::whereNotNull('rack_no')
-                ->select('rack_no')
-                ->distinct()
-                ->orderBy('rack_no')
-                ->pluck('rack_no')
-                ->map(fn($rack) => trim((string) $rack)),
+
+            // ✅ FIXED
+            'racks' => \App\Models\Rack::whereNull('deleted_at')
+                ->orderBy('name')
+                ->get(),
+
             'perPage' => $perPage,
         ]);
     }
@@ -69,6 +71,9 @@ class ProductController extends Controller
             'publications' => Publication::orderBy('name')->get(),
             'languages' => Language::orderBy('name')->get(),
             'categories' => Category::orderBy('name')->get(),
+            'racks' => Rack::whereNull('deleted_at')
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
@@ -121,7 +126,7 @@ class ProductController extends Controller
                 'mrp'               => 'required|numeric|min:0',
                 'disc_from_company' => 'nullable|numeric|min:0|max:100',
                 'disc_for_customer' => 'nullable|numeric|min:0|max:100|lte:disc_from_company',
-                'rack_no'          => 'required|string|max:100',
+                'rack_id'          => 'required|exists:racks,id',
             ],
             [
                 'disc_for_customer.lte' =>
@@ -153,7 +158,7 @@ class ProductController extends Controller
             'amt_company'         => $amtCompany,
             'disc_for_customer'   => $validated['disc_for_customer'],
             'amt_customer'        => $amtCustomer,
-            'rack_no'             => $validated['rack_no'],
+            'rack_id'             => $validated['rack_id'],
         ]);
 
         return redirect()
@@ -181,6 +186,7 @@ class ProductController extends Controller
             'publications'  => Publication::orderBy('name')->get(),
             'languages'     => Language::orderBy('name')->get(),
             'categories'    => Category::orderBy('name')->get(),
+            'racks'           => Rack::whereNull('deleted_at')->orderBy('name')->get(),
         ]);
     }
 
@@ -204,7 +210,7 @@ class ProductController extends Controller
             'publication_id'       => ['required', 'exists:publications,id'],
             'language_id'          => ['required', 'exists:languages,id'],
             'category_id'          => ['required', 'exists:categories,id'],
-            'rack_no'              => ['required', 'string', 'max:100'],
+            'rack_id'              => ['required', 'exists:racks,id'],
         ]);
 
         DB::transaction(function () use ($validated, $product) {
@@ -236,7 +242,7 @@ class ProductController extends Controller
                 'publication_id'     => $validated['publication_id'],
                 'language_id'        => $validated['language_id'],
                 'category_id'        => $validated['category_id'],
-                'rack_no'            => $validated['rack_no'],
+                'rack_id'            => $validated['rack_id'],
             ]);
         });
 
@@ -248,7 +254,7 @@ class ProductController extends Controller
             'filter_author_id'       => 'author_id',
             'filter_publication_id'  => 'publication_id',
             'filter_category_id'     => 'category_id',
-            'filter_rack_no'         => 'rack_no',
+            'filter_rack_id'         => 'rack_id',
             'page'                   => 'page',
         ];
 
@@ -310,7 +316,7 @@ class ProductController extends Controller
                             'Company Amount' => $product->amt_company,
                             'Customer Amount' => $product->amt_customer,
 
-                            'Rack No' => $product->rack_no,
+                            'Rack No' => $product->rack?->name,
                             'Created At' => $product->created_at?->format('Y-m-d'),
                         ]);
                     }

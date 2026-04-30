@@ -5,7 +5,7 @@
 
         // 🔥 BUILD FILTER_* PARAMS (THIS IS THE FIX)
         $filterParams = [];
-        foreach (['search', 'author_id', 'publication_id', 'category_id', 'rack_no', 'page'] as $key) {
+        foreach (['search', 'author_id', 'publication_id', 'category_id', 'rack_id', 'page'] as $key) {
             if (request()->filled($key)) {
                 $filterParams['filter_' . $key] = request($key);
             }
@@ -68,11 +68,11 @@
             </select>
 
             {{-- Rack --}}
-            <select name="rack_no" class="select select-bordered w-full" onchange="submitFilters()">
+            <select name="rack_id" class="select select-bordered w-full" onchange="submitFilters()">
                 <option value="">All Racks</option>
                 @foreach ($racks as $rack)
-                    <option value="{{ $rack }}" {{ request('rack_no') == $rack ? 'selected' : '' }}>
-                        {{ $rack }}
+                    <option value="{{ $rack->id }}" {{ request('rack_id') == $rack->id ? 'selected' : '' }}>
+                        {{ $rack->name }}
                     </option>
                 @endforeach
             </select>
@@ -151,7 +151,7 @@
 
                         <td>{{ $product->category->name ?? '-' }}</td>
 
-                        <td>{{ $product->rack_no ?? '-' }}</td>
+                        <td>{{ $product->rack->name ?? '-' }}</td>
 
                         <td class="text-right space-x-1">
                             {{-- 👁 View --}}
@@ -245,7 +245,7 @@
             document.getElementById('view_book_pages').textContent = product.book_pages ?? '-';
             document.getElementById('view_barcode_no').textContent = product.barcode_no ?? '-';
             document.getElementById('view_mrp').textContent = product.mrp ?? '-';
-            document.getElementById('view_rack_no').textContent = product.rack_no ?? '-';
+            document.getElementById('view_rack_no').textContent = product.rack?.name ?? '-';
 
             // DISCOUNTS
             document.getElementById('view_disc_company').textContent =

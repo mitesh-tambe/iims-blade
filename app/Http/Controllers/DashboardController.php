@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Author;
 use App\Models\Publication;
 use App\Models\Category;
+use App\Models\Rack;
 
 class DashboardController extends Controller
 {
@@ -16,6 +17,7 @@ class DashboardController extends Controller
             'authorsCount'      => Author::count(),
             'publicationsCount' => Publication::count(),
             'categoriesCount'   => Category::count(),
+            'racksCount'         => Rack::count(),
         ]);
     }
 }

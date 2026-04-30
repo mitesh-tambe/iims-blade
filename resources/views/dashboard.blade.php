@@ -2,7 +2,7 @@
     <div class="p-6">
         {{-- <h1 class="text-2xl font-bold mb-6">Dashboard</h1> --}}
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
 
             {{-- Products --}}
             <a href="{{ route('products.index') }}" class="card bg-base-100 shadow hover:shadow-lg transition">
@@ -40,6 +40,14 @@
                 </div>
             </a>
 
+            {{-- Racks --}}
+            <a href="{{ route('racks.index') }}" class="card bg-base-100 shadow hover:shadow-lg transition">
+                <div class="card-body items-center text-center">
+                    <i class="fa-solid fa-warehouse text-4xl text-warning"></i>
+                    <h2 class="card-title mt-2">Racks</h2>
+                    <p class="text-3xl font-bold">{{ $racksCount }}</p>
+                </div>
+            </a>
         </div>
     </div>
 </x-app-layout>

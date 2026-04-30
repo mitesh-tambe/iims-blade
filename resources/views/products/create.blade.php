@@ -179,8 +179,16 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="label">Rack No.</label>
-                        <input type="text" name="rack_no" class="input input-bordered w-full"
-                            value="{{ old('rack_no') }}" placeholder="Rack Number" required />
+                        <select name="rack_id" class="select select-bordered w-full" required>
+                            <option value="">Select Rack</option>
+
+                            @foreach ($racks as $rack)
+                                <option value="{{ $rack->id }}"
+                                    {{ old('rack_id') == $rack->id ? 'selected' : '' }}>
+                                    {{ $rack->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 

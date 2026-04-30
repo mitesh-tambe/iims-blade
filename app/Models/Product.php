@@ -94,12 +94,16 @@ class Product extends Model
         }
 
         // 📦 RACK FILTER (0-safe)
-        if (
-            array_key_exists('rack_no', $filters) &&
-            $filters['rack_no'] !== '' &&
-            $filters['rack_no'] !== null
-        ) {
-            $query->where('rack_no', $filters['rack_no']);
+        // if (
+        //     array_key_exists('rack_no', $filters) &&
+        //     $filters['rack_no'] !== '' &&
+        //     $filters['rack_no'] !== null
+        // ) {
+        //     $query->where('rack_no', $filters['rack_no']);
+        // }
+
+        if (!empty($filters['rack_id'])) {
+            $query->where('rack_id', $filters['rack_id']);
         }
 
         return $query;
