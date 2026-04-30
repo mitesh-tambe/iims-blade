@@ -47,6 +47,16 @@
             });
         }
 
+        /* ================= RACK ================= */
+        if (document.getElementById('rackSelect')) {
+            rackTS = new TomSelect('#rackSelect', {
+                placeholder: 'Select Rack',
+                allowEmptyOption: true,
+                maxOptions: 1000,
+                dropdownParent: 'body',
+            });
+        }
+
         /* ================= PRICE CALCULATION ================= */
         function roundAmount(value) {
             return Math.round(value);
@@ -193,5 +203,22 @@
         });
         categoryTS.refreshOptions(false);
         categoryTS.setValue(id);
+    });
+
+    // RACK CREATED
+    window.addEventListener('rack-created', (e) => {
+        if (!rackTS) return;
+
+        const {
+            id,
+            name
+        } = e.detail;
+
+        rackTS.addOption({
+            value: id,
+            text: name
+        });
+        rackTS.refreshOptions(false);
+        rackTS.setValue(id);
     });
 </script>

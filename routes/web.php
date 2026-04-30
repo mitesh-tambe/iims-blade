@@ -8,6 +8,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\RackController;
+use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('publications', PublicationController::class);
     Route::resource('racks', RackController::class);
     Route::resource('languages', LanguageController::class);
+    Route::resource('vendors', VendorController::class);
 });
 
 require __DIR__ . '/auth.php';

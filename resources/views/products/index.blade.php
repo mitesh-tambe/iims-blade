@@ -120,7 +120,7 @@
                     <th>Sr. No.</th>
                     <th>Book Name</th>
                     <th>ISBN</th>
-                    <th>Pages</th>
+                    <th>Publication</th>
                     <th>MRP</th>
                     <th>Author</th>
                     <th>Language</th>
@@ -141,7 +141,7 @@
 
                         <td>{{ $product->isbn ?? '-' }}</td>
 
-                        <td>{{ $product->book_pages }}</td>
+                        <td>{{ $product->publication->name ?? '-' }}</td>
 
                         <td>₹ {{ number_format($product->mrp, 2) }}</td>
 

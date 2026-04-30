@@ -176,12 +176,12 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="label">Rack No.</label>
-                        <select name="rack_id" class="select select-bordered w-full" required>
+                {{-- rack no  --}}
+                <div>
+                    <label class="label">Rack No.</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <select name="rack_id" id="rackSelect" class="select select-bordered w-full">
                             <option value="">Select Rack</option>
-
                             @foreach ($racks as $rack)
                                 <option value="{{ $rack->id }}"
                                     {{ old('rack_id') == $rack->id ? 'selected' : '' }}>
@@ -189,6 +189,11 @@
                                 </option>
                             @endforeach
                         </select>
+
+                        <button type="button" class="btn btn-outline btn-primary w-full"
+                            onclick="create_rack.showModal()">
+                            + Add Rack
+                        </button>
                     </div>
                 </div>
 
@@ -208,6 +213,7 @@
     @include('publications.partials.create-publication-modal')
     @include('languages.partials.create-language-modal')
     @include('categories.partials.create-category-modal')
+    @include('racks.partials.create-rack-modal')
 
     {{-- TOAST --}}
     @include('components.toast')

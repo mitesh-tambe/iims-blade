@@ -7,9 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 class Purchase extends Model
 {
     protected $fillable = [
-        'supplier_id',
+        'vendor_id',
         'invoice_no',
         'total_amount',
         'purchase_date'
     ];
+
+    public function vendor()
+    {
+        return $this->belongsTo(Vendor::class);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(PurchaseItem::class);
+    }
 }
