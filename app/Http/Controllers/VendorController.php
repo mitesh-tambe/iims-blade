@@ -36,6 +36,8 @@ class VendorController extends Controller
                 'phone' => 'required|string|max:20',
                 'email' => 'nullable|email|max:255|unique:vendors,email',
                 'address' => 'nullable|string',
+                'pan_no' => 'nullable|string|max:255',
+                'gst_no' => 'nullable|string|max:255',
             ]);
 
             // ✅ Create Vendor
@@ -87,6 +89,8 @@ class VendorController extends Controller
                 'phone' => 'required|string|max:20',
                 'email' => 'nullable|email|max:255|unique:vendors,email,' . $vendor->id,
                 'address' => 'nullable|string',
+                'pan_no' => 'nullable|string|max:255',
+                'gst_no' => 'nullable|string|max:255',
             ]);
 
             // ✅ Update Vendor

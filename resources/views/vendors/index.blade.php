@@ -58,7 +58,7 @@
 
                             {{-- ✏️ Edit --}}
                             <button class="btn btn-xs btn-warning tooltip" data-tip="Edit"
-                                onclick="openEditVendor({{ $vendor->id }}, @js($vendor->name), @js($vendor->phone), @js($vendor->email), @js($vendor->address))">
+                                onclick="openEditVendor({{ $vendor->id }}, @js($vendor->name), @js($vendor->phone), @js($vendor->email), @js($vendor->address), @js($vendor->pan_no), @js($vendor->gst_no))">
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
 
@@ -108,6 +108,8 @@
             document.getElementById('view_vendor_phone').value = vendor.phone;
             document.getElementById('view_vendor_email').value = vendor.email;
             document.getElementById('view_vendor_address').value = vendor.address;
+            document.getElementById('view_vendor_pan_no').value = vendor.pan_no;
+            document.getElementById('view_vendor_gst_no').value = vendor.gst_no;
             view_vendor.showModal();
         }
     </script>

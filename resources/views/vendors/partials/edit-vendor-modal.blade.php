@@ -44,6 +44,22 @@
                 <input type="text" id="edit_vendor_address" class="input input-bordered w-full" />
             </div>
 
+            {{-- pan_no  --}}
+            <div>
+                <label class="label">
+                    <span class="label-text">PAN No.</span>
+                </label>
+                <input type="text" id="edit_vendor_pan_no" class="input input-bordered w-full" />
+            </div>
+
+            {{-- gst_no  --}}
+            <div>
+                <label class="label">
+                    <span class="label-text">GST No.</span>
+                </label>
+                <input type="text" id="edit_vendor_gst_no" class="input input-bordered w-full" />
+            </div>
+
             <div class="flex justify-end gap-2">
                 <button type="button" class="btn btn-ghost" onclick="edit_vendor.close()">
                     Cancel
@@ -57,12 +73,14 @@
 </dialog>
 
 <script>
-    function openEditVendor(id, name, phone, email, address) {
+    function openEditVendor(id, name, phone, email, address, pan_no, gst_no) {
         document.getElementById('edit_vendor_id').value = id;
         document.getElementById('edit_vendor_name').value = name;
         document.getElementById('edit_vendor_phone').value = phone;
         document.getElementById('edit_vendor_email').value = email;
         document.getElementById('edit_vendor_address').value = address;
+        document.getElementById('edit_vendor_pan_no').value = pan_no;
+        document.getElementById('edit_vendor_gst_no').value = gst_no;
         edit_vendor.showModal();
     }
 
@@ -74,6 +92,8 @@
         const phone = document.getElementById('edit_vendor_phone').value;
         const email = document.getElementById('edit_vendor_email').value;
         const address = document.getElementById('edit_vendor_address').value;
+        const pan_no = document.getElementById('edit_vendor_pan_no').value;
+        const gst_no = document.getElementById('edit_vendor_gst_no').value;
         const token = document.querySelector('input[name="_token"]').value;
 
         const response = await fetch(`/vendors/${id}`, {
@@ -87,7 +107,9 @@
                 name,
                 phone,
                 email,
-                address
+                address,
+                pan_no,
+                gst_no
             })
         });
 
@@ -102,6 +124,8 @@
             row.querySelector('.vendor-phone').innerText = data.vendor.phone;
             row.querySelector('.vendor-email').innerText = data.vendor.email;
             row.querySelector('.vendor-address').innerText = data.vendor.address;
+            // row.querySelector('.vendor-pan-no').innerText = data.vendor.pan_no;
+            // row.querySelector('.vendor-gst-no').innerText = data.vendor.gst_no;
         }
 
         showToast(data.message);

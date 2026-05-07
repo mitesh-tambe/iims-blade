@@ -10,7 +10,9 @@ class Vendor extends Model
         'name',
         'phone',
         'email',
-        'address'
+        'address',
+        'pan_no',
+        'gst_no'
     ];
 
     public function purchases()

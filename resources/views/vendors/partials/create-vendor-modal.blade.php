@@ -49,6 +49,24 @@
                 <p id="vendor_address_error" class="mt-1 text-sm text-error hidden"></p>
             </div>
 
+            {{-- pan_no  --}}
+            <div>
+                <label class="label">
+                    <span class="label-text">PAN No.</span>
+                </label>
+                <input type="text" id="vendor_pan_no" name="pan_no" class="input input-bordered w-full" placeholder="Enter PAN number" />
+                <p id="vendor_pan_no_error" class="mt-1 text-sm text-error hidden"></p>
+            </div>
+
+            {{-- gst_no  --}}
+            <div>
+                <label class="label">
+                    <span class="label-text">GST No.</span>
+                </label>
+                <input type="text" id="vendor_gst_no" name="gst_no" class="input input-bordered w-full" placeholder="Enter GST number" />
+                <p id="vendor_gst_no_error" class="mt-1 text-sm text-error hidden"></p>
+            </div>
+
             <div class="flex justify-end gap-2">
                 <button type="button" class="btn btn-ghost" onclick="document.getElementById('create_vendor').close()">
                     Cancel
@@ -69,7 +87,7 @@
 
         if (!form) return;
 
-        const fields = ['name', 'phone', 'email', 'address'];
+        const fields = ['name', 'phone', 'email', 'address', 'pan_no', 'gst_no'];
 
         // 🔹 Clear errors on input
         fields.forEach(field => {
@@ -92,6 +110,8 @@
                 phone: document.getElementById('vendor_phone').value.trim(),
                 email: document.getElementById('vendor_email').value.trim(),
                 address: document.getElementById('vendor_address').value.trim(),
+                pan_no: document.getElementById('vendor_pan_no').value.trim(),
+                gst_no: document.getElementById('vendor_gst_no').value.trim()
             };
 
             try {

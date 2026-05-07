@@ -36,6 +36,20 @@
                 </label>
                 <input type="text" id="view_vendor_address" class="input input-bordered w-full bg-base-200" readonly />
             </div>
+
+            <div>
+                <label class="label">
+                    <span class="label-text">PAN No.</span>
+                </label>
+                <input type="text" id="view_vendor_pan_no" class="input input-bordered w-full bg-base-200" readonly />
+            </div>
+
+            <div>
+                <label class="label">
+                    <span class="label-text">GST No.</span>
+                </label>
+                <input type="text" id="view_vendor_gst_no" class="input input-bordered w-full bg-base-200" readonly />
+            </div>
         </form>
     </div>
 </dialog>
