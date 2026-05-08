@@ -124,8 +124,8 @@
             row.querySelector('.vendor-phone').innerText = data.vendor.phone;
             row.querySelector('.vendor-email').innerText = data.vendor.email;
             row.querySelector('.vendor-address').innerText = data.vendor.address;
-            // row.querySelector('.vendor-pan-no').innerText = data.vendor.pan_no;
-            // row.querySelector('.vendor-gst-no').innerText = data.vendor.gst_no;
+            row.querySelector('.vendor-pan-no').innerText = data.vendor.pan_no;
+            row.querySelector('.vendor-gst-no').innerText = data.vendor.gst_no;
         }
 
         showToast(data.message);

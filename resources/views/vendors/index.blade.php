@@ -48,11 +48,14 @@
                             {{ $vendor->address }}
                         </td>
 
+                        <td class="vendor-pan-no hidden">{{ $vendor->pan_no }}</td>
+                        <td class="vendor-gst-no hidden">{{ $vendor->gst_no }}</td>
+
                         <td class="text-right space-x-1">
 
                             {{-- 👁 View --}}
                             <button type="button" class="btn btn-xs btn-info tooltip" data-tip="View"
-                                onclick='openViewVendor(@json($vendor))'>
+                                onclick='openViewVendor({{ $vendor->id }})'>
                                 <i class="fa-solid fa-eye"></i>
                             </button>
 
@@ -102,7 +105,7 @@
     {{-- 🔔 TOAST --}}
     @include('components.toast')
 
-    <script>
+    {{-- <script>
         function openViewVendor(vendor) {
             document.getElementById('view_vendor_name').value = vendor.name;
             document.getElementById('view_vendor_phone').value = vendor.phone;
@@ -110,6 +113,35 @@
             document.getElementById('view_vendor_address').value = vendor.address;
             document.getElementById('view_vendor_pan_no').value = vendor.pan_no;
             document.getElementById('view_vendor_gst_no').value = vendor.gst_no;
+            view_vendor.showModal();
+        }
+    </script> --}}
+
+    <script>
+        function openViewVendor(id) {
+
+            const row = document.querySelector(`[data-vendor-id="${id}"]`);
+
+            if (!row) return;
+
+            document.getElementById('view_vendor_name').value =
+                row.querySelector('.vendor-name').innerText;
+
+            document.getElementById('view_vendor_phone').value =
+                row.querySelector('.vendor-phone').innerText;
+
+            document.getElementById('view_vendor_email').value =
+                row.querySelector('.vendor-email').innerText;
+
+            document.getElementById('view_vendor_address').value =
+                row.querySelector('.vendor-address').innerText;
+
+            document.getElementById('view_vendor_pan_no').value =
+                row.querySelector('.vendor-pan-no').innerText;
+
+            document.getElementById('view_vendor_gst_no').value =
+                row.querySelector('.vendor-gst-no').innerText;
+
             view_vendor.showModal();
         }
     </script>

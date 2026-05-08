@@ -325,4 +325,36 @@ class ProductController extends Controller
             $writer->close();
         }, $fileName);
     }
+
+    public function search(Request $request)
+    {
+        $search = trim($request->q);
+
+        if (!$search) {
+            return response()->json([]);
+        }
+
+        $products = Product::query()
+
+            ->where(function ($query) use ($search) {
+
+                $query->where('book_name', 'LIKE', "%{$search}%")
+                    ->orWhere('isbn', 'LIKE', "%{$search}%")
+                    ->orWhere('barcode_no', 'LIKE', "%{$search}%");
+            })
+
+            ->select(
+                'id',
+                'book_name',
+                'isbn',
+                'barcode_no',
+                'mrp'
+            )
+
+            ->limit(20)
+
+            ->get();
+
+        return response()->json($products);
+    }
 }

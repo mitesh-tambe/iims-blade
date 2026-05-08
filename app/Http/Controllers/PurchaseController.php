@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Models\Purchase;
+use App\Models\Vendor;
 use Illuminate\Http\Request;
 
 class PurchaseController extends Controller
@@ -12,7 +14,8 @@ class PurchaseController extends Controller
      */
     public function index()
     {
-        //
+        $purchases = Purchase::with('vendor')->get();
+        return view('invoices.index', compact('purchases'));
     }
 
     /**
@@ -20,7 +23,9 @@ class PurchaseController extends Controller
      */
     public function create()
     {
-        //
+        $vendors = Vendor::all();
+        $products = Product::all();
+        return view('invoices.create', compact('vendors', 'products'));
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicationController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\RackController;
 use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
@@ -24,7 +25,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/products/export', [ProductController::class, 'export'])
         ->name('products.export');
-        
+    Route::get('/products/search', [ProductController::class, 'search'])->name('products.search');
+
     Route::resource('products', ProductController::class);
     Route::resource('authors', AuthorController::class);
     Route::resource('categories', CategoryController::class);
@@ -32,6 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('racks', RackController::class);
     Route::resource('languages', LanguageController::class);
     Route::resource('vendors', VendorController::class);
+    Route::resource('invoices', PurchaseController::class);
 });
 
 require __DIR__ . '/auth.php';

@@ -179,7 +179,7 @@
                         </li>
 
                         <li>
-                            <a href="#"
+                            <a href="{{ route('invoices.index') }}"
                                 class="is-drawer-close:tooltip is-drawer-close:tooltip-right {{ request()->routeIs('invoices.*') ? 'active' : '' }}"
                                 data-tip="invoices">
 
