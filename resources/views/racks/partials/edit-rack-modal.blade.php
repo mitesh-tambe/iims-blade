@@ -67,6 +67,18 @@
         const row = document.querySelector(`[data-rack-id="${id}"]`);
         if (row) {
             row.querySelector('.rack-name').innerText = data.rack.name;
+
+            // Update edit button onclick value
+            const editButton = row.querySelector('.btn-warning');
+
+            if (editButton) {
+
+                editButton.setAttribute(
+                    'onclick',
+                    `openEditRack(${data.rack.id}, '${data.rack.name.replace(/'/g, "\\'")}')`
+                );
+
+            }
         }
 
         showToast(data.message);

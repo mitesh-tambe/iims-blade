@@ -74,60 +74,132 @@
 
 <script>
     function openEditVendor(id, name, phone, email, address, pan_no, gst_no) {
+
         document.getElementById('edit_vendor_id').value = id;
-        document.getElementById('edit_vendor_name').value = name;
-        document.getElementById('edit_vendor_phone').value = phone;
-        document.getElementById('edit_vendor_email').value = email;
-        document.getElementById('edit_vendor_address').value = address;
-        document.getElementById('edit_vendor_pan_no').value = pan_no;
-        document.getElementById('edit_vendor_gst_no').value = gst_no;
+        document.getElementById('edit_vendor_name').value = name ?? '';
+        document.getElementById('edit_vendor_phone').value = phone ?? '';
+        document.getElementById('edit_vendor_email').value = email ?? '';
+        document.getElementById('edit_vendor_address').value = address ?? '';
+        document.getElementById('edit_vendor_pan_no').value = pan_no ?? '';
+        document.getElementById('edit_vendor_gst_no').value = gst_no ?? '';
+
         edit_vendor.showModal();
     }
 
     document.getElementById('editVendorForm').addEventListener('submit', async function(e) {
+
         e.preventDefault();
 
         const id = document.getElementById('edit_vendor_id').value;
-        const name = document.getElementById('edit_vendor_name').value;
-        const phone = document.getElementById('edit_vendor_phone').value;
-        const email = document.getElementById('edit_vendor_email').value;
-        const address = document.getElementById('edit_vendor_address').value;
-        const pan_no = document.getElementById('edit_vendor_pan_no').value;
-        const gst_no = document.getElementById('edit_vendor_gst_no').value;
-        const token = document.querySelector('input[name="_token"]').value;
 
-        const response = await fetch(`/vendors/${id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": token,
-                "Accept": "application/json"
-            },
-            body: JSON.stringify({
-                name,
-                phone,
-                email,
-                address,
-                pan_no,
-                gst_no
-            })
-        });
+        const name =
+            document.getElementById('edit_vendor_name').value;
 
-        const data = await response.json();
+        const phone =
+            document.getElementById('edit_vendor_phone').value;
 
-        edit_vendor.close();
+        const email =
+            document.getElementById('edit_vendor_email').value;
 
-        // Update table instantly
-        const row = document.querySelector(`[data-vendor-id="${id}"]`);
-        if (row) {
-            row.querySelector('.vendor-name').innerText = data.vendor.name;
-            row.querySelector('.vendor-phone').innerText = data.vendor.phone;
-            row.querySelector('.vendor-email').innerText = data.vendor.email;
-            row.querySelector('.vendor-address').innerText = data.vendor.address;
-            row.querySelector('.vendor-pan-no').innerText = data.vendor.pan_no;
-            row.querySelector('.vendor-gst-no').innerText = data.vendor.gst_no;
+        const address =
+            document.getElementById('edit_vendor_address').value;
+
+        const pan_no =
+            document.getElementById('edit_vendor_pan_no').value;
+
+        const gst_no =
+            document.getElementById('edit_vendor_gst_no').value;
+
+        const token =
+            document.querySelector('input[name="_token"]').value;
+
+        try {
+
+            const response = await fetch(`/vendors/${id}`, {
+
+                method: "PUT",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": token,
+                    "Accept": "application/json"
+                },
+
+                body: JSON.stringify({
+                    name,
+                    phone,
+                    email,
+                    address,
+                    pan_no,
+                    gst_no
+                })
+
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+
+                showToast('Failed to update vendor', 'error');
+                return;
+
+            }
+
+            edit_vendor.close();
+
+            // ✅ Update table instantly
+            const row =
+                document.querySelector(`[data-vendor-id="${id}"]`);
+
+            if (row) {
+
+                row.querySelector('.vendor-name').innerText =
+                    data.vendor.name ?? '';
+
+                row.querySelector('.vendor-phone').innerText =
+                    data.vendor.phone ?? '';
+
+                row.querySelector('.vendor-email').innerText =
+                    data.vendor.email ?? '';
+
+                row.querySelector('.vendor-address').innerText =
+                    data.vendor.address ?? '';
+
+                // ✅ update dataset
+                row.dataset.panNo =
+                    data.vendor.pan_no ?? '';
+
+                row.dataset.gstNo =
+                    data.vendor.gst_no ?? '';
+
+                // ✅ IMPORTANT FIX:
+                // update edit button onclick with latest values
+                const editBtn =
+                    row.querySelector('.btn-warning');
+
+                editBtn.setAttribute(
+                    'onclick',
+                    `openEditVendor(
+                        ${data.vendor.id},
+                        ${JSON.stringify(data.vendor.name ?? '')},
+                        ${JSON.stringify(data.vendor.phone ?? '')},
+                        ${JSON.stringify(data.vendor.email ?? '')},
+                        ${JSON.stringify(data.vendor.address ?? '')},
+                        ${JSON.stringify(data.vendor.pan_no ?? '')},
+                        ${JSON.stringify(data.vendor.gst_no ?? '')}
+                    )`
+                );
+            }
+
+            showToast(data.message, 'success');
+
+        } catch (error) {
+
+            console.error(error);
+
+            showToast('Something went wrong', 'error');
+
         }
 
-        showToast(data.message);
     });
 </script>

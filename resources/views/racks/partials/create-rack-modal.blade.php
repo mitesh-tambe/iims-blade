@@ -105,17 +105,55 @@
                     row.dataset.rackId = data.rack.id;
 
                     row.innerHTML = `
-                    <th>1</th>
-                    <td class="rack-name">${data.rack.name}</td>
-                    <td class="text-right space-x-1">
-                        <a href="#" class="btn btn-xs btn-info">View</a>
-                        <button class="btn btn-xs btn-warning"
-                            onclick="openEditRack(${data.rack.id}, '${data.rack.name.replace(/'/g, "\\'")}')">
-                            Edit
-                        </button>
-                        <button type="button" class="btn btn-xs btn-error">Delete</button>
-                    </td>
-                `;
+    <th>1</th>
+
+    <td class="rack-name">
+        ${data.rack.name}
+    </td>
+
+    <td class="text-right space-x-1">
+
+        {{-- 👁 View --}}
+        <button type="button"
+            class="btn btn-xs btn-info tooltip"
+            data-tip="View" onclick="openViewRack('${data.rack.name.replace(/'/g, "\\'")}')">
+            <i class="fa-solid fa-eye"></i>
+        </button>
+
+        {{-- ✏️ Edit --}}
+        <button type="button"
+            class="btn btn-xs btn-warning tooltip"
+            data-tip="Edit"
+            onclick="openEditRack(${data.rack.id}, '${data.rack.name.replace(/'/g, "\\'")}')">
+
+            <i class="fa-solid fa-pencil"></i>
+        </button>
+
+        {{-- 🗑 Delete --}}
+        <form action="/racks/${data.rack.id}"
+            method="POST"
+            class="inline"
+            onsubmit="return confirm('Are you sure you want to delete this rack?')">
+
+            <input type="hidden"
+                name="_token"
+                value="${document.querySelector('input[name="_token"]').value}">
+
+            <input type="hidden"
+                name="_method"
+                value="DELETE">
+
+            <button type="submit"
+                class="btn btn-xs btn-error tooltip"
+                data-tip="Delete">
+
+                <i class="fa-solid fa-trash"></i>
+            </button>
+
+        </form>
+
+    </td>
+`;
 
                     tableBody.prepend(row);
 

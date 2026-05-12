@@ -28,7 +28,8 @@
 
             <tbody id='vendorsTableBody'>
                 @forelse ($vendors as $vendor)
-                    <tr class="hover:bg-base-300" data-vendor-id="{{ $vendor->id }}">
+                    <tr class="hover:bg-base-300" data-vendor-id="{{ $vendor->id }}"
+                        data-pan-no="{{ $vendor->pan_no }}" data-gst-no="{{ $vendor->gst_no }}">
                         <th>{{ $loop->iteration }}</th>
 
                         {{-- ✅ Needed for JS update --}}
@@ -47,9 +48,6 @@
                         <td class="vendor-address">
                             {{ $vendor->address }}
                         </td>
-
-                        <td class="vendor-pan-no hidden">{{ $vendor->pan_no }}</td>
-                        <td class="vendor-gst-no hidden">{{ $vendor->gst_no }}</td>
 
                         <td class="text-right space-x-1">
 
@@ -105,17 +103,6 @@
     {{-- 🔔 TOAST --}}
     @include('components.toast')
 
-    {{-- <script>
-        function openViewVendor(vendor) {
-            document.getElementById('view_vendor_name').value = vendor.name;
-            document.getElementById('view_vendor_phone').value = vendor.phone;
-            document.getElementById('view_vendor_email').value = vendor.email;
-            document.getElementById('view_vendor_address').value = vendor.address;
-            document.getElementById('view_vendor_pan_no').value = vendor.pan_no;
-            document.getElementById('view_vendor_gst_no').value = vendor.gst_no;
-            view_vendor.showModal();
-        }
-    </script> --}}
 
     <script>
         function openViewVendor(id) {
@@ -125,22 +112,23 @@
             if (!row) return;
 
             document.getElementById('view_vendor_name').value =
-                row.querySelector('.vendor-name').innerText;
+                row.querySelector('.vendor-name')?.innerText || '';
 
             document.getElementById('view_vendor_phone').value =
-                row.querySelector('.vendor-phone').innerText;
+                row.querySelector('.vendor-phone')?.innerText || '';
 
             document.getElementById('view_vendor_email').value =
-                row.querySelector('.vendor-email').innerText;
+                row.querySelector('.vendor-email')?.innerText || '';
 
             document.getElementById('view_vendor_address').value =
-                row.querySelector('.vendor-address').innerText;
+                row.querySelector('.vendor-address')?.innerText || '';
 
+            // ✅ Read from dataset instead of hidden td
             document.getElementById('view_vendor_pan_no').value =
-                row.querySelector('.vendor-pan-no').innerText;
+                row.dataset.panNo || '';
 
             document.getElementById('view_vendor_gst_no').value =
-                row.querySelector('.vendor-gst-no').innerText;
+                row.dataset.gstNo || '';
 
             view_vendor.showModal();
         }
