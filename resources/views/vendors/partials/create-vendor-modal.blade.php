@@ -34,7 +34,7 @@
                     <span class="label-text">Phone</span>
                 </label>
 
-                <input type="text" id="vendor_phone" name="phone" class="input input-bordered w-full"
+                <input type="number" id="vendor_phone" name="phone" class="input input-bordered w-full"
                     placeholder="Enter phone number" required />
 
                 <p id="vendor_phone_error" class="mt-1 text-sm text-error hidden">
@@ -268,14 +268,15 @@
                             </button>
 
                             {{-- 🗑 Delete --}}
-                            <button
-                                type="button"
-                                class="btn btn-xs btn-error tooltip"
-                                data-tip="Delete">
+                            <form action="{{ route('vendors.destroy', $vendor->id) }}" method="POST" class="inline"
+                                onsubmit="return confirm('Are you sure you want to delete this vendor?')">
+                                @csrf
+                                @method('DELETE')
 
-                                <i class="fa-solid fa-trash"></i>
-
-                            </button>
+                                <button type="submit" class="btn btn-xs btn-error tooltip" data-tip="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
 
                         </td>
                     `;

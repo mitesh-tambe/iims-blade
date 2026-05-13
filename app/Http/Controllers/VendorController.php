@@ -31,14 +31,19 @@ class VendorController extends Controller
     {
         try {
             // ✅ Validation
-            $validated = $request->validate([
-                'name' => 'required|string|max:255|unique:vendors,name',
-                'phone' => 'required|string|max:20',
-                'email' => 'nullable|email|max:255|unique:vendors,email',
-                'address' => 'nullable|string',
-                'pan_no' => 'nullable|string|max:255',
-                'gst_no' => 'nullable|string|max:255',
-            ]);
+            $validated = $request->validate(
+                [
+                    'name' => 'required|string|max:255|unique:vendors,name',
+                    'phone' => 'required|digits_between:1,12',
+                    'email' => 'nullable|email|max:255|unique:vendors,email',
+                    'address' => 'nullable|string',
+                    'pan_no' => 'nullable|string|max:255',
+                    'gst_no' => 'nullable|string|max:255',
+                ],
+                [
+                    'phone.digits_between' => 'The phone number cannot be more than 12 digits.',
+                ]
+            );
 
             // ✅ Create Vendor
             $vendor = Vendor::create($validated);
@@ -84,14 +89,19 @@ class VendorController extends Controller
     {
         try {
             // ✅ Validation
-            $validated = $request->validate([
-                'name' => 'required|string|max:255|unique:vendors,name,' . $vendor->id,
-                'phone' => 'required|string|max:20',
-                'email' => 'nullable|email|max:255|unique:vendors,email,' . $vendor->id,
-                'address' => 'nullable|string',
-                'pan_no' => 'nullable|string|max:255',
-                'gst_no' => 'nullable|string|max:255',
-            ]);
+            $validated = $request->validate(
+                [
+                    'name' => 'required|string|max:255|unique:vendors,name,' . $vendor->id,
+                    'phone' => 'required|digits_between:1,12',
+                    'email' => 'nullable|email|max:255|unique:vendors,email,' . $vendor->id,
+                    'address' => 'nullable|string',
+                    'pan_no' => 'nullable|string|max:255',
+                    'gst_no' => 'nullable|string|max:255',
+                ],
+                [
+                    'phone.digits_between' => 'The phone number cannot be more than 12 digits.',
+                ]
+            );
 
             // ✅ Update Vendor
             $vendor->update($validated);
