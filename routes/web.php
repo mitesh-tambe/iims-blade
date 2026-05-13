@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
@@ -9,12 +10,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\RackController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [AuthenticatedSessionController::class, 'create']);
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -35,6 +35,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('languages', LanguageController::class);
     Route::resource('vendors', VendorController::class);
     Route::resource('invoices', PurchaseController::class);
+    Route::resource('users', UserController::class);
 });
 
 require __DIR__ . '/auth.php';
