@@ -268,15 +268,17 @@
                             </button>
 
                             {{-- 🗑 Delete --}}
-                            <form action="{{ route('vendors.destroy', $vendor->id) }}" method="POST" class="inline"
-                                onsubmit="return confirm('Are you sure you want to delete this vendor?')">
-                                @csrf
-                                @method('DELETE')
+                            <form action="/vendors/${data.vendor.id}" method="POST" class="inline"
+    onsubmit="return confirm('Are you sure you want to delete this vendor?')">
 
-                                <button type="submit" class="btn btn-xs btn-error tooltip" data-tip="Delete">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </form>
+    @csrf
+    @method('DELETE')
+
+    <button type="submit" class="btn btn-xs btn-error tooltip" data-tip="Delete">
+        <i class="fa-solid fa-trash"></i>
+    </button>
+
+</form>
 
                         </td>
                     `;
