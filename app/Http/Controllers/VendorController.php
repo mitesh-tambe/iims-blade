@@ -12,9 +12,15 @@ class VendorController extends Controller
      */
     public function index()
     {
-        $vendors = Vendor::all();
+        // $vendors = Vendor::all();
+        // return view('vendors.index', compact('vendors'));
+        $vendors = Vendor::where('name', 'like', '%' . request('search') . '%')
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
         return view('vendors.index', compact('vendors'));
     }
+
 
     /**
      * Show the form for creating a new resource.

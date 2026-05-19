@@ -87,9 +87,9 @@
         </table>
     </div>
 
-    {{-- <div class="mt-4">
+    <div class="mt-4">
         {{ $vendors->links() }}
-    </div> --}}
+    </div>
 
     {{-- 🔹 CREATE MODAL --}}
     @include('vendors.partials.create-vendor-modal')
