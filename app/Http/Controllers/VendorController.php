@@ -137,7 +137,7 @@ class VendorController extends Controller
     {
         try {
             $vendor->delete();
-            return redirect()->route('vendors.index')->with('success', 'Vendor deleted successfully');
+            return redirect()->back()->with('success', 'Vendor deleted successfully');
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Something went wrong'

@@ -4,12 +4,14 @@
         $hasFilters = request()->except('page') !== [];
 
         // 🔥 BUILD FILTER_* PARAMS (THIS IS THE FIX)
-        $filterParams = [];
-        foreach (['search', 'author_id', 'publication_id', 'category_id', 'rack_id', 'page'] as $key) {
-            if (request()->filled($key)) {
-                $filterParams['filter_' . $key] = request($key);
-            }
-        }
+        // $filterParams = [];
+        // foreach (['search', 'author_id', 'publication_id', 'category_id', 'rack_id', 'page'] as $key) {
+        //     if (request()->filled($key)) {
+        //         $filterParams['filter_' . $key] = request($key);
+        //     }
+        // }
+
+        $filterParams = request()->only(['search', 'author_id', 'publication_id', 'category_id', 'rack_id', 'page']);
     @endphp
 
     <div class="overflow-x-auto space-y-4">
@@ -167,12 +169,30 @@
                             </a>
 
                             {{-- ❌ Delete --}}
-                            <form
+                            {{-- <form
                                 action="{{ route('products.destroy', array_merge(['product' => $product->id], $filterParams)) }}"
                                 method="POST" class="inline"
                                 onsubmit="return confirm('Are you sure you want to delete this product?')">
                                 @csrf
                                 @method('DELETE')
+                                <button type="submit" class="btn btn-xs btn-error">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form> --}}
+                            <form
+                                action="{{ route(
+                                    'products.destroy',
+                                    array_merge(
+                                        ['product' => $product->id],
+                                        request()->only(['search', 'author_id', 'publication_id', 'category_id', 'rack_id', 'page']),
+                                    ),
+                                ) }}"
+                                method="POST" class="inline"
+                                onsubmit="return confirm('Are you sure you want to delete this product?')">
+
+                                @csrf
+                                @method('DELETE')
+
                                 <button type="submit" class="btn btn-xs btn-error">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
@@ -237,6 +257,10 @@
 
     <script>
         function openViewProduct(product) {
+
+            currentProductId = product.id;
+            barcodeQtyInput.value = '';
+            generateBarcodeBtn.disabled = true;
 
             // BASIC DETAILS
             document.getElementById('view_book_name').textContent = product.book_name ?? '-';

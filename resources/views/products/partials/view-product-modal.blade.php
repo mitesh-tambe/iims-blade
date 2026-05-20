@@ -101,7 +101,23 @@
         </div>
 
         {{-- Footer --}}
-        <div class="modal-action">
+        <div class="modal-action flex flex-col sm:flex-row sm:items-center gap-3">
+            {{-- Label Quantity --}}
+            <div class="flex items-center gap-2">
+
+                <label class="font-semibold text-sm whitespace-nowrap">
+                    Labels Qty
+                </label>
+
+                <input type="number" id="barcode_qty" class="input input-bordered input-sm w-24" min="1"
+                    placeholder="Qty">
+
+            </div>
+
+            {{-- Generate Barcode --}}
+            <button type="button" class="btn btn-secondary" id="generate_barcode_btn" disabled>
+                Generate Barcode
+            </button>
             <form method="dialog">
                 <button class="btn btn-primary">Close</button>
             </form>
@@ -109,3 +125,43 @@
 
     </div>
 </dialog>
+
+<script>
+    let currentProductId = null;
+
+    const barcodeQtyInput =
+        document.getElementById('barcode_qty');
+
+    const generateBarcodeBtn =
+        document.getElementById('generate_barcode_btn');
+
+    // Enable / Disable button
+    barcodeQtyInput.addEventListener('input', function() {
+
+        const qty = parseInt(this.value);
+
+        if (qty > 0) {
+
+            generateBarcodeBtn.disabled = false;
+
+        } else {
+
+            generateBarcodeBtn.disabled = true;
+        }
+    });
+
+    // Generate Barcode Print Page
+    generateBarcodeBtn.addEventListener('click', function() {
+
+        const qty = barcodeQtyInput.value;
+
+        if (!qty || qty <= 0) {
+            return;
+        }
+
+        window.open(
+            `/products/${currentProductId}/barcode-print?qty=${qty}`,
+            '_blank'
+        );
+    });
+</script>

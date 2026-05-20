@@ -357,4 +357,14 @@ class ProductController extends Controller
 
         return response()->json($products);
     }
+
+    public function barcodePrint(Product $product)
+    {
+        $qty = request()->qty ?? 1;
+
+        return view(
+            'products.barcode-print',
+            compact('product', 'qty')
+        );
+    }
 }

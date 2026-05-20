@@ -194,8 +194,20 @@
                     </div>
                 </div>
 
-                @foreach (request()->only(['search', 'filter_author_id', 'filter_publication_id', 'filter_category_id', 'filter_rack_no', 'page']) as $key => $value)
+                {{-- @foreach (request()->only(['search', 'filter_author_id', 'filter_publication_id', 'filter_category_id', 'filter_rack_no', 'page']) as $key => $value)
                     <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endforeach --}}
+                @foreach ([
+        'filter_search' => request('search'),
+        'filter_author_id' => request('author_id'),
+        'filter_publication_id' => request('publication_id'),
+        'filter_category_id' => request('category_id'),
+        'filter_rack_id' => request('rack_id'),
+        'page' => request('page'),
+    ] as $key => $value)
+                    @if (!is_null($value))
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endif
                 @endforeach
 
                 {{-- SUBMIT --}}

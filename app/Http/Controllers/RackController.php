@@ -88,6 +88,6 @@ class RackController extends Controller
     {
         $rack->delete(); // 👈 soft delete
 
-        return redirect()->route('racks.index')->with('success', 'Rack deleted successfully');
+        return redirect()->back()->with('success', 'Rack deleted successfully!');
     }
 }
