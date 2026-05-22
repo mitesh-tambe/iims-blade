@@ -32,6 +32,10 @@ Route::get('/barcode-test', function () {
     return view('barcode-test', compact('barcode'));
 });
 
+Route::get('/bill-test', function () {
+    return view('bill-test');
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
