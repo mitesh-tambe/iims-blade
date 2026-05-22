@@ -266,7 +266,10 @@ class ProductController extends Controller
 
         return redirect()
             ->route('products.index', $filters)
-            ->with('success', 'Product updated successfully.');
+            ->with('success', 'Product updated successfully.')
+            ->with('updated_product_id', [
+                'id' => $product->id,
+            ]);
     }
 
 

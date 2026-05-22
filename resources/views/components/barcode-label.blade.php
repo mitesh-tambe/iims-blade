@@ -4,7 +4,7 @@
 
     {{-- shop name --}}
     <div class="shop-name">
-        Ideal Book Co.
+        IDEAL BOOK CO.
     </div>
 
     {{-- Book Name --}}

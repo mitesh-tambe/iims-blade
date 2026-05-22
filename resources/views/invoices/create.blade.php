@@ -88,20 +88,33 @@
                             <div class="md:col-span-2">
                                 <label class="label">Qty</label>
 
-                                <input type="number" name="products[0][quantity]" class="input input-bordered w-full"
-                                    min="1" value="1" required />
+                                {{-- <input type="number" name="products[0][quantity]" class="input input-bordered w-full"
+                                    min="1" value="1" required /> --}}
+
+                                <input type="number" name="products[0][quantity]"
+                                    class="quantity-input input input-bordered w-full" min="1" value="1"
+                                    required />
                             </div>
 
                             {{-- Purchase Price --}}
                             <div class="md:col-span-3">
                                 <label class="label">Purchase Price</label>
 
+                                {{-- <input type="number" step="0.01" name="products[0][purchase_price]"
+                                    class="input input-bordered w-full" placeholder="Price" required /> --}}
+
                                 <input type="number" step="0.01" name="products[0][purchase_price]"
-                                    class="input input-bordered w-full" placeholder="Price" required />
+                                    class="purchase-price input input-bordered w-full" placeholder="Price" required />
+                            </div>
+
+                            <div class="md:col-span-1">
+                                <button type="button" class="btn btn-warning w-full edit-product-btn">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
                             </div>
 
                             {{-- Remove --}}
-                            <div class="md:col-span-2">
+                            <div class="md:col-span-1">
                                 <button type="button" class="btn btn-error w-full" onclick="removeProductRow(this)">
 
                                     <i class="fa-solid fa-trash"></i>
@@ -129,7 +142,7 @@
 
         function createTomSelect(selectElement) {
 
-            new TomSelect(selectElement, {
+            const tom = new TomSelect(selectElement, {
 
                 valueField: 'id',
 
@@ -157,45 +170,95 @@
                         return callback();
                     }
 
-                    // Barcode fast match
-                    if (/^\d+$/.test(query)) {
-
-                        fetch(`/products/search?q=${encodeURIComponent(query)}`)
-                            .then(response => response.json())
-                            .then(json => {
-
-                                callback(json);
-
-                                // Auto select if exact single match
-                                if (json.length === 1) {
-
-                                    this.addOption(json[0]);
-
-                                    this.setValue(json[0].id);
-                                }
-
-                            })
-                            .catch(() => {
-                                callback();
-                            });
-
-                        return;
-                    }
-
-                    // Normal search
                     fetch(`/products/search?q=${encodeURIComponent(query)}`)
                         .then(response => response.json())
                         .then(json => {
 
                             callback(json);
 
+                            if (json.length === 1 && /^\d+$/.test(query)) {
+
+                                this.addOption(json[0]);
+
+                                this.setValue(json[0].id);
+                            }
+
                         })
                         .catch(() => {
-
                             callback();
-
                         });
+                },
+
+                render: {
+                    option: function(item, escape) {
+                        return `
+                    <div>
+                        <strong>${escape(item.book_name)}</strong>
+                        <div class="text-xs text-gray-500">
+                            ₹ ${item.mrp ?? 0}
+                        </div>
+                    </div>
+                `;
+                    }
+                },
+
+                onItemAdd: function(value) {
+
+                    const row = selectElement.closest('.product-row');
+
+                    row.dataset.productId = value;
+
+                    const selected = this.options[value];
+
+                    const qtyInput = row.querySelector('.quantity-input');
+
+                    const priceInput = row.querySelector('.purchase-price');
+
+                    const qty = parseFloat(qtyInput.value || 1);
+
+                    const mrp = parseFloat(selected.mrp || 0);
+
+                    priceInput.value = (qty * mrp).toFixed(2);
+
+                    calculateTotal();
                 }
+            });
+
+            const row = selectElement.closest('.product-row');
+
+            const editBtn = row.querySelector('.edit-product-btn');
+
+            editBtn.addEventListener('click', function() {
+
+                const productId = row.dataset.productId;
+
+                if (!productId) {
+                    alert('Please select product first');
+                    return;
+                }
+
+                window.open(`/products/${productId}/edit`, '_blank');
+            });
+
+            row.querySelector('.quantity-input').addEventListener('input', function() {
+
+                const product = tom.options[tom.getValue()];
+
+                if (!product) return;
+
+                const qty = parseFloat(this.value || 1);
+
+                const mrp = parseFloat(product.mrp || 0);
+
+                row.querySelector('.purchase-price').value =
+                    (qty * mrp).toFixed(2);
+
+                calculateTotal();
+            });
+
+            row.querySelector('.purchase-price').addEventListener('input', function() {
+
+                calculateTotal();
 
             });
         }
@@ -235,7 +298,7 @@
 
                 <input type="number"
                     name="products[${productIndex}][quantity]"
-                    class="input input-bordered w-full"
+                    class="input input-bordered w-full quantity-input"
                     min="1"
                     value="1"
                     required />
@@ -247,12 +310,19 @@
                 <input type="number"
                     step="0.01"
                     name="products[${productIndex}][purchase_price]"
-                    class="input input-bordered w-full"
+                    class="input input-bordered w-full purchase-price"
                     placeholder="Price"
                     required />
             </div>
 
-            <div class="md:col-span-2">
+            <div class="md:col-span-1">
+    <button type="button"
+        class="btn btn-warning w-full edit-product-btn">
+        <i class="fa-solid fa-pen"></i>
+    </button>
+</div>
+
+            <div class="md:col-span-1">
                 <button type="button"
                     class="btn btn-error w-full"
                     onclick="removeProductRow(this)">
@@ -281,5 +351,71 @@
 
             button.closest('.product-row').remove();
         }
+
+        function calculateTotal() {
+
+            let total = 0;
+
+            document.querySelectorAll('.purchase-price').forEach(input => {
+
+                total += parseFloat(input.value || 0);
+
+            });
+
+            document.querySelector('input[name="total_amount"]').value =
+                total.toFixed(2);
+        }
+
+
+        window.addEventListener('storage', async function(event) {
+
+            if (event.key !== 'product_updated') {
+                return;
+            }
+
+            const data = JSON.parse(event.newValue);
+
+            const productId = data.id;
+
+            document.querySelectorAll('.product-row').forEach(async row => {
+
+                if (row.dataset.productId != productId) {
+                    return;
+                }
+
+                try {
+
+                    const response = await fetch(`/products/${productId}/json`);
+
+                    const product = await response.json();
+
+                    const tomSelect =
+                        row.querySelector('.product-select').tomselect;
+
+                    tomSelect.clearOptions();
+
+                    tomSelect.addOption(product);
+
+                    tomSelect.refreshOptions(false);
+
+                    tomSelect.setValue(product.id, true);
+
+                    const qty =
+                        parseFloat(row.querySelector('.quantity-input').value || 1);
+
+                    row.querySelector('.purchase-price').value =
+                        (qty * parseFloat(product.mrp)).toFixed(2);
+
+                    calculateTotal();
+
+                    console.log('storage fired', event);
+
+                } catch (e) {
+
+                    console.error(e);
+
+                }
+            });
+        });
     </script>
 </x-app-layout>

@@ -12,6 +12,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\RackController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
+use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 use Milon\Barcode\Facades\DNS1DFacade as DNS1D;
 
@@ -45,7 +46,18 @@ Route::middleware('auth')->group(function () {
         '/products/{product}/barcode-print',
         [ProductController::class, 'barcodePrint']
     )->name('products.barcode.print');
-    
+
+    Route::get('/products/{product}/json', function (Product $product) {
+
+        return response()->json([
+            'id' => $product->id,
+            'book_name' => $product->book_name,
+            'mrp' => $product->mrp,
+            'isbn' => $product->isbn,
+            'barcode_no' => $product->barcode_no,
+        ]);
+    });
+
     Route::resource('authors', AuthorController::class);
     Route::resource('categories', CategoryController::class);
     Route::resource('publications', PublicationController::class);

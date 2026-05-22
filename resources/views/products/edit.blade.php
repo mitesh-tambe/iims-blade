@@ -233,4 +233,19 @@
     {{-- JS (IDENTICAL LOGIC AS CREATE) --}}
     @include('products.partials.product-form-js')
 
+    <script>
+        document.querySelector('form').addEventListener('submit', function() {
+
+            localStorage.setItem(
+                'product_updated',
+                JSON.stringify({
+                    id: {{ $product->id }},
+                    time: Date.now()
+                })
+            );
+
+            console.log('writing localStorage');
+        });
+    </script>
+
 </x-app-layout>
