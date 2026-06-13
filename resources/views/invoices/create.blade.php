@@ -55,6 +55,14 @@
                             value="{{ old('total_amount') }}" placeholder="Total amount" required />
                     </div>
 
+                    {{-- ref no --}}
+                    <div>
+                        <label class="label">Reference No</label>
+
+                        <input type="text" name="ref_no" class="input input-bordered w-full"
+                            value="{{ $ref_no }}" placeholder="Enter reference number" required readonly/>
+                    </div>
+
                 </div>
 
                 {{-- PRODUCTS --}}
@@ -74,7 +82,7 @@
                     <div id="productRows" class="space-y-3">
 
                         {{-- DEFAULT ROW --}}
-                        <div class="product-row grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                        <div class="product-row grid grid-cols-1 md:grid-cols-13 gap-3 items-end">
 
                             {{-- Product --}}
                             <div class="md:col-span-5">
@@ -105,6 +113,13 @@
 
                                 <input type="number" step="0.01" name="products[0][purchase_price]"
                                     class="purchase-price input input-bordered w-full" placeholder="Price" required />
+                            </div>
+
+                            {{-- genrate barcode button --}}
+                            <div class="md:col-span-1">
+                                <button type="button" class="btn btn-info w-full generate-barcode-btn">
+                                    <i class="fa-solid fa-barcode"></i>
+                                </button>
                             </div>
 
                             <div class="md:col-span-1">
@@ -280,7 +295,7 @@
             const row = document.createElement('div');
 
             row.className =
-                'product-row grid grid-cols-1 md:grid-cols-12 gap-3 items-end';
+                'product-row grid grid-cols-1 md:grid-cols-13 gap-3 items-end';
 
             row.innerHTML = `
 
@@ -316,11 +331,16 @@
             </div>
 
             <div class="md:col-span-1">
-    <button type="button"
-        class="btn btn-warning w-full edit-product-btn">
-        <i class="fa-solid fa-pen"></i>
-    </button>
-</div>
+            <button type="button" class="btn btn-info w-full generate-barcode-btn">
+                <i class="fa-solid fa-barcode"></i>
+            </button>
+            </div>
+
+            <div class="md:col-span-1">
+                <button type="button" class="btn btn-warning w-full edit-product-btn">
+                <i class="fa-solid fa-pen"></i>
+            </button>
+            </div>
 
             <div class="md:col-span-1">
                 <button type="button"
@@ -416,6 +436,58 @@
 
                 }
             });
+        });
+    </script>
+
+    <script>
+        // Barcode Generate Button Click
+        document.addEventListener('click', function(e) {
+
+            const button = e.target.closest('.generate-barcode-btn');
+
+            if (!button) return;
+
+            // Current Row
+            const row = button.closest('.product-row');
+
+            if (!row) return;
+
+            // Product Select
+            const productSelect =
+                row.querySelector('.product-select');
+
+            // Quantity Input
+            const quantityInput =
+                row.querySelector('.quantity-input');
+
+            // Values
+            const productId = productSelect.value;
+
+            const qty = parseInt(quantityInput.value);
+
+            // Validation
+            if (!productId) {
+
+                alert('Please select product');
+
+                return;
+            }
+
+            if (!qty || qty <= 0) {
+
+                alert('Please enter valid quantity');
+
+                quantityInput.focus();
+
+                return;
+            }
+
+            // Open Barcode Print Page
+            window.open(
+                `/products/${productId}/barcode-print?qty=${qty}`,
+                '_blank'
+            );
+
         });
     </script>
 </x-app-layout>

@@ -14,6 +14,13 @@
             </a>
         </div>
 
+        {{-- show success message --}}
+        @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
         {{-- 📋 Invoices Table --}}
         <table class="table">
             <thead>
@@ -38,16 +45,19 @@
 
                         <td>{{ $purchase->vendor->name ?? '-' }}</td>
 
-                        <td>{{ $purchase->purchase_date ?? '-' }}</td>
+                        <td>
+                            {{ $purchase->purchase_date ? $purchase->purchase_date->format('d/m/Y') : '-' }}
+                        </td>
 
                         <td>₹ {{ number_format($purchase->total_amount, 2) }}</td>
 
 
                         <td class="text-right space-x-1">
                             {{-- 👁 View --}}
-                            <button type="button" class="btn btn-xs btn-info">
+                            <a href="{{ route('invoices.show', ['invoice' => $purchase->id]) }}"
+                                class="btn btn-xs btn-info">
                                 <i class="fa-solid fa-eye"></i>
-                            </button>
+                            </a>
 
                             {{-- ✏️ Edit --}}
                             <a href="{{ route('invoices.edit', ['invoice' => $purchase->id]) }}"
@@ -56,9 +66,8 @@
                             </a>
 
                             {{-- ❌ Delete --}}
-                            <form
-                                action="{{ route('invoices.destroy', ['invoice' => $purchase->id]) }}"
-                                method="POST" class="inline"
+                            <form action="{{ route('invoices.destroy', ['invoice' => $purchase->id]) }}" method="POST"
+                                class="inline"
                                 onsubmit="return confirm('Are you sure you want to delete this invoice?')">
                                 @csrf
                                 @method('DELETE')

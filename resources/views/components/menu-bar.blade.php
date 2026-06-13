@@ -177,6 +177,7 @@
                 </details>
             </li>
 
+            @if(auth()->user()->email === 'admin@gmail.com')
             <li>
                 <a href="{{ route('users.index') }}" class="is-drawer-close:tooltip is-drawer-close:tooltip-right">
 
@@ -192,6 +193,7 @@
                     <span class="is-drawer-close:hidden">Users</span>
                 </a>
             </li>
+            @endif
 
             <!-- Logout button -->
             <li>
