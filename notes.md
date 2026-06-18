@@ -1,0 +1,1 @@
+bill-test.blade.php remove margin auto and check its working or not.

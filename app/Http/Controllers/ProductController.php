@@ -11,6 +11,7 @@ use App\Models\Rack;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Spatie\SimpleExcel\SimpleExcelWriter;
 
 class ProductController extends Controller
@@ -118,7 +119,7 @@ class ProductController extends Controller
                 'edition'           => 'nullable|string|max:50',
                 // 'book_pages'        => 'nullable|integer',
                 'book_pages' => 'required|string|max:10',
-                'barcode_no'        => 'nullable|string|max:255',
+                'barcode_no'        => 'nullable|string|max:255|unique:products,barcode_no',
                 'author_id'         => 'required|exists:authors,id',
                 'publication_id'    => 'required|exists:publications,id',
                 'language_id'       => 'required|exists:languages,id',
@@ -178,8 +179,39 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Product $product)
+    public function edit(Request $request, Product $product)
     {
+        // Existing barcode or blank
+        $nextBarcode = $product->barcode_no ?? '';
+
+        // Generate only when:
+        // 1. Opened from special button
+        // 2. Current product barcode is empty/null
+        if (
+            $request->generate_barcode == 1 &&
+            empty($product->barcode_no)
+        ) {
+
+            $lastProduct = Product::whereNotNull('barcode_no')
+                ->orderByDesc('barcode_no')
+                ->first();
+
+            if ($lastProduct && preg_match('/(\d+)$/', $lastProduct->barcode_no, $matches)) {
+
+                $number = (int)$matches[1] + 1;
+
+                $nextBarcode = 'IBC' . str_pad(
+                    $number,
+                    5,
+                    '0',
+                    STR_PAD_LEFT
+                );
+            } else {
+                $nextBarcode = 'IBC00001';
+            }
+        }
+
+
         return view('products.edit', [
             'product'       => $product,
             'authors'       => Author::orderBy('name')->get(),
@@ -187,6 +219,7 @@ class ProductController extends Controller
             'languages'     => Language::orderBy('name')->get(),
             'categories'    => Category::orderBy('name')->get(),
             'racks'           => Rack::whereNull('deleted_at')->orderBy('name')->get(),
+            'nextBarcode'  => $nextBarcode,
         ]);
     }
 
@@ -200,7 +233,12 @@ class ProductController extends Controller
             'isbn'                 => ['nullable', 'string', 'max:100'],
             'edition'              => ['nullable', 'integer', 'min:1'],
             'book_pages'           => ['required', 'string', 'max:10'],
-            'barcode_no'           => ['nullable', 'string', 'max:100'],
+            'barcode_no' => [
+                'nullable',
+                'string',
+                'max:100',
+                Rule::unique('products', 'barcode_no')->ignore($product->id),
+            ],
             'mrp'                  => ['required', 'numeric', 'min:0'],
             'disc_from_company'    => ['nullable', 'numeric', 'min:0', 'max:100'],
             'amt_company'          => ['nullable', 'numeric', 'min:0'],

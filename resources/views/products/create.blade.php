@@ -47,6 +47,9 @@
                         <label class="label">Barcode No</label>
                         <input type="text" name="barcode_no" class="input input-bordered w-full"
                             value="{{ old('barcode_no') }}" placeholder="Barcode number" />
+                        @error('barcode_no')
+                            <p class="text-error text-sm mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     {{-- MRP --}}

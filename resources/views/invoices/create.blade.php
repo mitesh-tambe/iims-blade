@@ -252,7 +252,7 @@
                     return;
                 }
 
-                window.open(`/products/${productId}/edit`, '_blank');
+                window.open(`/products/${productId}/edit?generate_barcode=1`, '_blank');
             });
 
             row.querySelector('.quantity-input').addEventListener('input', function() {
