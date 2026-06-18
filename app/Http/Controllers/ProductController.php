@@ -228,17 +228,42 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        $validated = $request->validate([
+        // $validated = $request->validate([
+        //     'book_name'            => ['required', 'string', 'max:255'],
+        //     'isbn'                 => ['nullable', 'string', 'max:100'],
+        //     'edition'              => ['nullable', 'integer', 'min:1'],
+        //     'book_pages'           => ['required', 'string', 'max:10'],
+        //     'barcode_no' => [
+        //         'nullable',
+        //         'string',
+        //         'max:100',
+        //         Rule::unique('products', 'barcode_no')->ignore($product->id),
+        //     ],
+        //     'mrp'                  => ['required', 'numeric', 'min:0'],
+        //     'disc_from_company'    => ['nullable', 'numeric', 'min:0', 'max:100'],
+        //     'amt_company'          => ['nullable', 'numeric', 'min:0'],
+        //     'disc_for_customer'    => ['nullable', 'numeric', 'min:0', 'max:100'],
+        //     'amt_customer'         => ['nullable', 'numeric', 'min:0'],
+        //     'author_id'            => ['required', 'exists:authors,id'],
+        //     'publication_id'       => ['required', 'exists:publications,id'],
+        //     'language_id'          => ['required', 'exists:languages,id'],
+        //     'category_id'          => ['required', 'exists:categories,id'],
+        //     'rack_id'              => ['required', 'exists:racks,id'],
+        // ]);
+
+        $validator = Validator::make($request->all(), [
             'book_name'            => ['required', 'string', 'max:255'],
             'isbn'                 => ['nullable', 'string', 'max:100'],
             'edition'              => ['nullable', 'integer', 'min:1'],
             'book_pages'           => ['required', 'string', 'max:10'],
+
             'barcode_no' => [
                 'nullable',
                 'string',
                 'max:100',
                 Rule::unique('products', 'barcode_no')->ignore($product->id),
             ],
+
             'mrp'                  => ['required', 'numeric', 'min:0'],
             'disc_from_company'    => ['nullable', 'numeric', 'min:0', 'max:100'],
             'amt_company'          => ['nullable', 'numeric', 'min:0'],
@@ -250,6 +275,13 @@ class ProductController extends Controller
             'category_id'          => ['required', 'exists:categories,id'],
             'rack_id'              => ['required', 'exists:racks,id'],
         ]);
+
+        if ($validator->fails()) {
+            dd($validator->errors()->toArray());
+        }
+
+        $validated = $validator->validated();
+
 
         DB::transaction(function () use ($validated, $product) {
             $mrp = (float) $validated['mrp'];
