@@ -10,9 +10,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\RackController;
+use App\Http\Controllers\SaleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
 use App\Models\Product;
+use App\Models\Sale;
 use Illuminate\Support\Facades\Route;
 use Milon\Barcode\Facades\DNS1DFacade as DNS1D;
 
@@ -32,9 +34,15 @@ Route::get('/barcode-test', function () {
     return view('barcode-test', compact('barcode'));
 });
 
-Route::get('/bill-test', function () {
-    return view('bill-test');
-});
+// Route::get('/bill-test', function () {
+//     return view('bill-test');
+// });
+
+
+Route::get('/bill-test/{sale}', function (Sale $sale) {
+    $sale->load('saleItems.product');
+    return view('bill-test', compact('sale'));
+})->name('bill.test');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -70,6 +78,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('vendors', VendorController::class);
     Route::resource('invoices', PurchaseController::class);
     Route::resource('users', UserController::class);
+    Route::resource('sales', SaleController::class);
 });
 
 require __DIR__ . '/auth.php';

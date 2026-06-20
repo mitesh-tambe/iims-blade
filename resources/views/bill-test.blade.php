@@ -254,15 +254,15 @@
         <div class="bill-info">
 
             <div>
-                Bill No: 1045
+                Bill No: {{ $sale->invoice_no }}
             </div>
 
             <div>
-                Date: 22/05/2026
+                Date: {{ \Carbon\Carbon::parse($sale->sale_date)->format('d/m/Y') }}
             </div>
 
             <div>
-                Time: 11:48 AM
+                Time: {{ \Carbon\Carbon::parse($sale->created_at)->format('h:i A') }}
             </div>
 
             <div>
@@ -289,75 +289,17 @@
 
             <tbody>
 
-                <tr>
-                    <td>TRAFFIC ENGINEERING AND TRANSPORT PLANNING</td>
-                    <td class="qty">1</td>
-                    <td class="price">850</td>
-                    <td class="amount">850</td>
-                </tr>
+                @foreach ($sale->saleItems as $item)
+                    <tr>
+                        <td>{{ $item->product->book_name }}</td>
 
-                <tr>
-                    <td>ADVANCED STRUCTURAL ANALYSIS FOR CIVIL ENGINEERS</td>
-                    <td class="qty">1</td>
-                    <td class="price">720</td>
-                    <td class="amount">720</td>
-                </tr>
+                        <td class="qty">{{ $item->quantity }}</td>
 
-                <tr>
-                    <td>DESIGN OF REINFORCED CONCRETE STRUCTURES</td>
-                    <td class="qty">2</td>
-                    <td class="price">560</td>
-                    <td class="amount">1120</td>
-                </tr>
+                        <td class="price">{{ number_format($item->mrp, 0) }}</td>
 
-                <tr>
-                    <td>GEOTECHNICAL ENGINEERING FOUNDATION DESIGN</td>
-                    <td class="qty">1</td>
-                    <td class="price">640</td>
-                    <td class="amount">640</td>
-                </tr>
-
-                <tr>
-                    <td>HIGHWAY ENGINEERING AND TRANSPORT MANAGEMENT</td>
-                    <td class="qty">1</td>
-                    <td class="price">580</td>
-                    <td class="amount">580</td>
-                </tr>
-
-                <tr>
-                    <td>ENVIRONMENTAL ENGINEERING WATER TREATMENT</td>
-                    <td class="qty">3</td>
-                    <td class="price">430</td>
-                    <td class="amount">1290</td>
-                </tr>
-
-                <tr>
-                    <td>ESTIMATION COSTING AND VALUATION HANDBOOK</td>
-                    <td class="qty">1</td>
-                    <td class="price">390</td>
-                    <td class="amount">390</td>
-                </tr>
-
-                <tr>
-                    <td>BUILDING CONSTRUCTION MATERIALS AND METHODS</td>
-                    <td class="qty">2</td>
-                    <td class="price">510</td>
-                    <td class="amount">1020</td>
-                </tr>
-
-                <tr>
-                    <td>HYDROLOGY AND WATER RESOURCE ENGINEERING</td>
-                    <td class="qty">1</td>
-                    <td class="price">470</td>
-                    <td class="amount">470</td>
-                </tr>
-
-                <tr>
-                    <td>CONSTRUCTION PROJECT MANAGEMENT TECHNIQUES</td>
-                    <td class="qty">1</td>
-                    <td class="price">760</td>
-                    <td class="amount">760</td>
-                </tr>
+                        <td class="amount">{{ number_format($item->selling_price, 0) }}</td>
+                    </tr>
+                @endforeach
 
             </tbody>
 
@@ -370,24 +312,24 @@
 
             <div class="totals-row">
                 <span>Subtotal</span>
-                <span>₹7840</span>
+                <span>₹ {{ $sale->total_amount }}</span>
             </div>
 
             <div class="totals-row">
                 <span>CGST</span>
-                <span>₹392</span>
+                <span>₹0</span>
             </div>
 
             <div class="totals-row">
                 <span>SGST</span>
-                <span>₹392</span>
+                <span>₹0</span>
             </div>
 
             <div class="divider"></div>
 
             <div class="totals-row grand-total">
                 <span>Total</span>
-                <span>₹8624</span>
+                <span>₹ {{ $sale->total_amount }}</span>
             </div>
 
         </div>
@@ -398,12 +340,6 @@
         <div class="small-text">
 
             Payment Mode: CASH
-
-        </div>
-
-        <div class="small-text">
-
-            Total Savings: ₹250
 
         </div>
 

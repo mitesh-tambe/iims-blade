@@ -67,14 +67,12 @@
 
                 {{-- PRODUCTS --}}
                 <div class="space-y-3 pt-4">
-
                     <div class="flex items-center justify-between">
                         <h3 class="font-semibold text-lg">
                             Products and Quantities
                         </h3>
 
                         <button type="button" class="btn btn-sm btn-primary" onclick="addProductRow()">
-
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
@@ -137,7 +135,6 @@
                             </div>
 
                         </div>
-
                     </div>
                 </div>
 

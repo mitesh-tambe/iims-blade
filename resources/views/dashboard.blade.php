@@ -50,4 +50,460 @@
             </a>
         </div>
     </div>
+
+    <section class="py-8">
+        <div class="container mx-auto px-5">
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- Chart Card -->
+                <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">
+                            Generate Bill
+                        </h3>
+                    </div>
+                    <form action="{{ route('sales.store') }}" method="POST">
+                        @csrf
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                            {{-- Invoice No --}}
+                            <div>
+                                <label class="label">Invoice No</label>
+
+                                <input type="text" name="invoice_no" class="input input-bordered w-full"
+                                    value="{{ old('invoice_no') }}" placeholder="Enter invoice number" required />
+
+                                @error('invoice_no')
+                                    <p class="text-error text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            {{-- Sale Date --}}
+                            <div>
+                                <label class="label">Date</label>
+
+                                <input type="date" name="sale_date" class="input input-bordered w-full"
+                                    value="{{ old('sale_date') }}" />
+                            </div>
+
+                            <div>
+                                <label class="label">Total Amt</label>
+
+                                <input type="text" name="total_amount" class="input input-bordered w-full"
+                                    value="{{ old('total_amount') }}" placeholder="Enter invoice number" required />
+
+                                @error('total_amount')
+                                    <p class="text-error text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 pt-4">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-semibold text-gray-800">
+                                    Products and Quantities
+                                </h4>
+
+                                <button type="button" class="btn btn-sm btn-primary" onclick="addProductRow()">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
+
+                            <div id="productRows" class="space-y-3">
+
+                                {{-- DEFAULT ROW --}}
+                                <div class="product-row grid grid-cols-1 md:grid-cols-13 gap-3 items-end">
+
+                                    {{-- Product --}}
+                                    <div class="md:col-span-5">
+                                        <label class="label">Product</label>
+
+                                        <select name="products[0][product_id]" class="product-select w-full" required>
+                                        </select>
+                                    </div>
+
+                                    {{-- Quantity --}}
+                                    <div class="md:col-span-2">
+                                        <label class="label">Qty</label>
+
+                                        {{-- <input type="number" name="products[0][quantity]" class="input input-bordered w-full"
+                                    min="1" value="1" required /> --}}
+
+                                        <input type="number" name="products[0][quantity]"
+                                            class="quantity-input input input-bordered w-full" min="1"
+                                            value="1" required />
+                                    </div>
+
+                                    {{-- Purchase Price --}}
+                                    <div class="md:col-span-3">
+                                        <label class="label">MRP</label>
+
+                                        {{-- <input type="number" step="0.01" name="products[0][purchase_price]"
+                                    class="input input-bordered w-full" placeholder="Price" required /> --}}
+
+                                        <input type="number" step="0.01" name="products[0][purchase_price]"
+                                            class="purchase-price input input-bordered w-full" placeholder="Price"
+                                            required />
+                                    </div>
+
+                                    <div class="md:col-span-1">
+                                        <button type="button" class="btn btn-warning w-full edit-product-btn">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                    </div>
+
+                                    {{-- Remove --}}
+                                    <div class="md:col-span-1">
+                                        <button type="button" class="btn btn-error w-full"
+                                            onclick="removeProductRow(this)">
+
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-4">
+                            <button type="submit" class="btn btn-primary">
+                                Save
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+
+                <!-- Table Card -->
+                <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">
+                            Recent Transactions
+                        </h3>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    {{-- sr.no. --}}
+                                    <th scope="col"
+                                        class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">
+                                        #</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">
+                                        Invoice No.</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">
+                                        Sale Date</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">
+                                        Total Amt</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                @foreach ($sales as $sale)
+                                    <tr>
+                                        <td>
+                                            {{ $loop->iteration }}
+                                        </td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                            {{ $sale->invoice_no }}</td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                            {{ $sale->sale_date }}</td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                            {{ $sale->total_amount }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let productIndex = 1;
+
+        function createTomSelect(selectElement) {
+
+            const tom = new TomSelect(selectElement, {
+
+                valueField: 'id',
+
+                labelField: 'book_name',
+
+                searchField: [
+                    'book_name',
+                    'isbn',
+                    'barcode_no'
+                ],
+
+                create: false,
+
+                preload: false,
+
+                maxOptions: 20,
+
+                placeholder: 'Search Product / ISBN / Barcode...',
+
+                loadThrottle: 100,
+
+                load: function(query, callback) {
+
+                    if (!query.length) {
+                        return callback();
+                    }
+
+                    fetch(`/products/search?q=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(json => {
+
+                            callback(json);
+
+                            if (json.length === 1 && /^\d+$/.test(query)) {
+
+                                this.addOption(json[0]);
+
+                                this.setValue(json[0].id);
+                            }
+
+                        })
+                        .catch(() => {
+                            callback();
+                        });
+                },
+
+                render: {
+                    option: function(item, escape) {
+                        return `
+                    <div>
+                        <strong>${escape(item.book_name)}</strong>
+                        <div class="text-xs text-gray-500">
+                            ₹ ${item.mrp ?? 0}
+                        </div>
+                    </div>
+                `;
+                    }
+                },
+
+                onItemAdd: function(value) {
+
+                    const row = selectElement.closest('.product-row');
+
+                    row.dataset.productId = value;
+
+                    const selected = this.options[value];
+
+                    const qtyInput = row.querySelector('.quantity-input');
+
+                    const priceInput = row.querySelector('.purchase-price');
+
+                    const qty = parseFloat(qtyInput.value || 1);
+
+                    const mrp = parseFloat(selected.mrp || 0);
+
+                    priceInput.value = (qty * mrp).toFixed(2);
+
+                    calculateTotal();
+                }
+            });
+
+            const row = selectElement.closest('.product-row');
+
+            const editBtn = row.querySelector('.edit-product-btn');
+
+            editBtn.addEventListener('click', function() {
+
+                const productId = row.dataset.productId;
+
+                if (!productId) {
+                    alert('Please select product first');
+                    return;
+                }
+
+                window.open(`/products/${productId}/edit?generate_barcode=1`, '_blank');
+            });
+
+            row.querySelector('.quantity-input').addEventListener('input', function() {
+
+                const product = tom.options[tom.getValue()];
+
+                if (!product) return;
+
+                const qty = parseFloat(this.value || 1);
+
+                const mrp = parseFloat(product.mrp || 0);
+
+                row.querySelector('.purchase-price').value =
+                    (qty * mrp).toFixed(2);
+
+                calculateTotal();
+            });
+
+            row.querySelector('.purchase-price').addEventListener('input', function() {
+
+                calculateTotal();
+
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            document.querySelectorAll('.product-select').forEach(select => {
+
+                createTomSelect(select);
+
+            });
+
+        });
+
+        function addProductRow() {
+
+            const container = document.getElementById('productRows');
+
+            const row = document.createElement('div');
+
+            row.className =
+                'product-row grid grid-cols-1 md:grid-cols-13 gap-3 items-end';
+
+            row.innerHTML = `
+
+            <div class="md:col-span-5">
+                <label class="label">Product</label>
+
+                <select name="products[${productIndex}][product_id]"
+                    class="product-select w-full"
+                    required>
+                </select>
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="label">Qty</label>
+
+                <input type="number"
+                    name="products[${productIndex}][quantity]"
+                    class="input input-bordered w-full quantity-input"
+                    min="1"
+                    value="1"
+                    required />
+            </div>
+
+            <div class="md:col-span-3">
+                <label class="label">Purchase Price</label>
+
+                <input type="number"
+                    step="0.01"
+                    name="products[${productIndex}][purchase_price]"
+                    class="input input-bordered w-full purchase-price"
+                    placeholder="Price"
+                    required />
+            </div>
+
+            <div class="md:col-span-1">
+                <button type="button" class="btn btn-warning w-full edit-product-btn">
+                <i class="fa-solid fa-pen"></i>
+            </button>
+            </div>
+
+            <div class="md:col-span-1">
+                <button type="button"
+                    class="btn btn-error w-full"
+                    onclick="removeProductRow(this)">
+
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        `;
+
+            container.appendChild(row);
+
+            const newSelect = row.querySelector('.product-select');
+
+            createTomSelect(newSelect);
+
+            productIndex++;
+        }
+
+        function removeProductRow(button) {
+
+            const rows = document.querySelectorAll('.product-row');
+
+            if (rows.length === 1) {
+                return;
+            }
+
+            button.closest('.product-row').remove();
+        }
+
+        function calculateTotal() {
+
+            let total = 0;
+
+            document.querySelectorAll('.purchase-price').forEach(input => {
+
+                total += parseFloat(input.value || 0);
+
+            });
+
+            document.querySelector('input[name="total_amount"]').value =
+                total.toFixed(2);
+        }
+
+
+        window.addEventListener('storage', async function(event) {
+
+            if (event.key !== 'product_updated') {
+                return;
+            }
+
+            const data = JSON.parse(event.newValue);
+
+            const productId = data.id;
+
+            document.querySelectorAll('.product-row').forEach(async row => {
+
+                if (row.dataset.productId != productId) {
+                    return;
+                }
+
+                try {
+
+                    const response = await fetch(`/products/${productId}/json`);
+
+                    const product = await response.json();
+
+                    const tomSelect =
+                        row.querySelector('.product-select').tomselect;
+
+                    tomSelect.clearOptions();
+
+                    tomSelect.addOption(product);
+
+                    tomSelect.refreshOptions(false);
+
+                    tomSelect.setValue(product.id, true);
+
+                    const qty =
+                        parseFloat(row.querySelector('.quantity-input').value || 1);
+
+                    row.querySelector('.purchase-price').value =
+                        (qty * parseFloat(product.mrp)).toFixed(2);
+
+                    calculateTotal();
+
+                    console.log('storage fired', event);
+
+                } catch (e) {
+
+                    console.error(e);
+
+                }
+            });
+        });
+    </script>
 </x-app-layout>
