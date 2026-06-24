@@ -56,7 +56,6 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                <!-- Chart Card -->
                 <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-800">
@@ -212,7 +211,7 @@
                                             {{ $sale->invoice_no }}</td>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                            {{ $sale->sale_date }}</td>
+                                            {{ $sale->sale_date ? $sale->sale_date->format('d/m/Y') : '-' }}</td>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                             {{ $sale->total_amount }}</td>
@@ -265,6 +264,7 @@
 
                             callback(json);
 
+                            // auto select barcode result
                             if (json.length === 1 && /^\d+$/.test(query)) {
 
                                 this.addOption(json[0]);
@@ -291,6 +291,25 @@
                     }
                 },
 
+                // FIX FOR BARCODE SCANNER
+                onInitialize: function() {
+
+                    const input = this.control_input;
+
+                    input.addEventListener('keydown', (e) => {
+
+                        // scanner sends Enter/Tab after barcode
+                        if (e.key === 'Enter' || e.key === 'Tab') {
+                            e.preventDefault();
+                        }
+                    });
+
+                    // focus first product field
+                    setTimeout(() => {
+                        this.focus();
+                    }, 100);
+                },
+
                 onItemAdd: function(value) {
 
                     const row = selectElement.closest('.product-row');
@@ -310,8 +329,20 @@
                     priceInput.value = (qty * mrp).toFixed(2);
 
                     calculateTotal();
+
+                    // keep cursor ready for next scan
+                    setTimeout(() => {
+
+                        this.control_input.value = '';
+
+                        this.focus();
+
+                    }, 50);
                 }
             });
+
+            // store instance
+            selectElement.tomselect = tom;
 
             const row = selectElement.closest('.product-row');
 
@@ -360,6 +391,18 @@
 
             });
 
+            // focus first product field initially
+            setTimeout(() => {
+
+                const firstSelect =
+                    document.querySelector('.product-select').tomselect;
+
+                if (firstSelect) {
+                    firstSelect.focus();
+                }
+
+            }, 200);
+
         });
 
         function addProductRow() {
@@ -373,58 +416,62 @@
 
             row.innerHTML = `
 
-            <div class="md:col-span-5">
-                <label class="label">Product</label>
+        <div class="md:col-span-5">
+            <label class="label">Product</label>
 
-                <select name="products[${productIndex}][product_id]"
-                    class="product-select w-full"
-                    required>
-                </select>
-            </div>
+            <select name="products[${productIndex}][product_id]"
+                class="product-select w-full"
+                required>
+            </select>
+        </div>
 
-            <div class="md:col-span-2">
-                <label class="label">Qty</label>
+        <div class="md:col-span-2">
+            <label class="label">Qty</label>
 
-                <input type="number"
-                    name="products[${productIndex}][quantity]"
-                    class="input input-bordered w-full quantity-input"
-                    min="1"
-                    value="1"
-                    required />
-            </div>
+            <input type="number"
+                name="products[${productIndex}][quantity]"
+                class="input input-bordered w-full quantity-input"
+                min="1"
+                value="1"
+                required />
+        </div>
 
-            <div class="md:col-span-3">
-                <label class="label">Purchase Price</label>
+        <div class="md:col-span-3">
+            <label class="label">Purchase Price</label>
 
-                <input type="number"
-                    step="0.01"
-                    name="products[${productIndex}][purchase_price]"
-                    class="input input-bordered w-full purchase-price"
-                    placeholder="Price"
-                    required />
-            </div>
+            <input type="number"
+                step="0.01"
+                name="products[${productIndex}][purchase_price]"
+                class="input input-bordered w-full purchase-price"
+                placeholder="Price"
+                required />
+        </div>
 
-            <div class="md:col-span-1">
-                <button type="button" class="btn btn-warning w-full edit-product-btn">
-                <i class="fa-solid fa-pen"></i>
+        <div class="md:col-span-1">
+            <button type="button" class="btn btn-warning w-full edit-product-btn">
+            <i class="fa-solid fa-pen"></i>
+        </button>
+        </div>
+
+        <div class="md:col-span-1">
+            <button type="button"
+                class="btn btn-error w-full"
+                onclick="removeProductRow(this)">
+
+                <i class="fa-solid fa-trash"></i>
             </button>
-            </div>
-
-            <div class="md:col-span-1">
-                <button type="button"
-                    class="btn btn-error w-full"
-                    onclick="removeProductRow(this)">
-
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </div>
-        `;
+        </div>
+    `;
 
             container.appendChild(row);
 
             const newSelect = row.querySelector('.product-select');
 
             createTomSelect(newSelect);
+
+            setTimeout(() => {
+                newSelect.tomselect.focus();
+            }, 100);
 
             productIndex++;
         }

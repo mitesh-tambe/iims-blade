@@ -41,16 +41,14 @@
                         <td class="text-right space-x-1">
 
                             {{-- 👁 View --}}
-                            <button type="button" class="btn btn-xs btn-info tooltip" data-tip="View"
-                                onclick="openViewSale('{{ $sale->invoice_no }}')">
+                            <a href="{{ route('sales.show', $sale) }}" class="btn btn-xs btn-info">
                                 <i class="fa-solid fa-eye"></i>
-                            </button>
+                            </a>
 
                             {{-- ✏️ Edit --}}
-                            <button class="btn btn-xs btn-warning tooltip" data-tip="Edit"
-                                onclick="openEditSale({{ $sale->id }}, @js($sale->invoice_no))">
+                            <a href="{{ route('sales.edit', $sale) }}" class="btn btn-xs btn-warning">
                                 <i class="fa-solid fa-pencil"></i>
-                            </button>
+                            </a>
 
                             <form action="{{ route('sales.destroy', $sale->id) }}" method="POST" class="inline"
                                 onsubmit="return confirm('Are you sure you want to delete this sale record?')">

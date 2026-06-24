@@ -82,7 +82,7 @@ class SaleController extends Controller
      */
     public function show(Sale $sale)
     {
-        //
+        return redirect()->route('bill.test', $sale->id);
     }
 
     /**
@@ -90,7 +90,9 @@ class SaleController extends Controller
      */
     public function edit(Sale $sale)
     {
-        //
+        $sale->load('saleItems.product');
+
+        return view('sales.edit', compact('sale'));
     }
 
     /**
@@ -98,7 +100,46 @@ class SaleController extends Controller
      */
     public function update(Request $request, Sale $sale)
     {
-        //
+        $validated = $request->validate([
+            'invoice_no' => 'required|string|unique:sales,invoice_no,' . $sale->id,
+            'sale_date' => 'nullable|date',
+            'total_amount' => 'required|numeric|min:0',
+
+            'products' => 'required|array|min:1',
+            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.quantity' => 'required|integer|min:1',
+            'products.*.purchase_price' => 'required|numeric|min:0',
+        ]);
+
+        DB::transaction(function () use ($validated, $sale) {
+
+            $sale->update([
+                'invoice_no' => $validated['invoice_no'],
+                'sale_date' => $validated['sale_date'],
+                'total_amount' => $validated['total_amount'],
+            ]);
+
+            $sale->saleItems()->delete();
+
+            $products = Product::whereIn(
+                'id',
+                collect($validated['products'])->pluck('product_id')
+            )->get()->keyBy('id');
+
+            foreach ($validated['products'] as $product) {
+
+                $selected = $products[$product['product_id']];
+
+                $sale->saleItems()->create([
+                    'product_id' => $product['product_id'],
+                    'quantity' => $product['quantity'],
+                    'selling_price' => $product['purchase_price'],
+                    'mrp' => $selected->mrp,
+                ]);
+            }
+        });
+
+        return redirect()->route('bill.test', $sale->id);
     }
 
     /**
