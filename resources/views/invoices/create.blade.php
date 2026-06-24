@@ -60,7 +60,7 @@
                         <label class="label">Reference No</label>
 
                         <input type="text" name="ref_no" class="input input-bordered w-full"
-                            value="{{ $ref_no }}" placeholder="Enter reference number" required readonly/>
+                            value="{{ $ref_no }}" placeholder="Enter reference number" required readonly />
                     </div>
 
                 </div>
@@ -149,7 +149,7 @@
         </form>
     </div>
 
-    <script>
+    {{-- <script>
         let productIndex = 1;
 
         function createTomSelect(selectElement) {
@@ -354,6 +354,341 @@
             const newSelect = row.querySelector('.product-select');
 
             createTomSelect(newSelect);
+
+            productIndex++;
+        }
+
+        function removeProductRow(button) {
+
+            const rows = document.querySelectorAll('.product-row');
+
+            if (rows.length === 1) {
+                return;
+            }
+
+            button.closest('.product-row').remove();
+        }
+
+        function calculateTotal() {
+
+            let total = 0;
+
+            document.querySelectorAll('.purchase-price').forEach(input => {
+
+                total += parseFloat(input.value || 0);
+
+            });
+
+            document.querySelector('input[name="total_amount"]').value =
+                total.toFixed(2);
+        }
+
+
+        window.addEventListener('storage', async function(event) {
+
+            if (event.key !== 'product_updated') {
+                return;
+            }
+
+            const data = JSON.parse(event.newValue);
+
+            const productId = data.id;
+
+            document.querySelectorAll('.product-row').forEach(async row => {
+
+                if (row.dataset.productId != productId) {
+                    return;
+                }
+
+                try {
+
+                    const response = await fetch(`/products/${productId}/json`);
+
+                    const product = await response.json();
+
+                    const tomSelect =
+                        row.querySelector('.product-select').tomselect;
+
+                    tomSelect.clearOptions();
+
+                    tomSelect.addOption(product);
+
+                    tomSelect.refreshOptions(false);
+
+                    tomSelect.setValue(product.id, true);
+
+                    const qty =
+                        parseFloat(row.querySelector('.quantity-input').value || 1);
+
+                    row.querySelector('.purchase-price').value =
+                        (qty * parseFloat(product.mrp)).toFixed(2);
+
+                    calculateTotal();
+
+                    console.log('storage fired', event);
+
+                } catch (e) {
+
+                    console.error(e);
+
+                }
+            });
+        });
+    </script> --}}
+
+    <script>
+        let productIndex = 1;
+
+        function createTomSelect(selectElement) {
+
+            const tom = new TomSelect(selectElement, {
+
+                valueField: 'id',
+
+                labelField: 'book_name',
+
+                searchField: [
+                    'book_name',
+                    'isbn',
+                    'barcode_no'
+                ],
+
+                create: false,
+
+                preload: false,
+
+                maxOptions: 20,
+
+                placeholder: 'Search Product / ISBN / Barcode...',
+
+                loadThrottle: 100,
+
+                load: function(query, callback) {
+
+                    if (!query.length) {
+                        return callback();
+                    }
+
+                    fetch(`/products/search?q=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(json => {
+
+                            callback(json);
+
+                            // auto select barcode result
+                            if (json.length === 1 && /^\d+$/.test(query)) {
+
+                                this.addOption(json[0]);
+
+                                this.setValue(json[0].id);
+                            }
+
+                        })
+                        .catch(() => {
+                            callback();
+                        });
+                },
+
+                render: {
+                    option: function(item, escape) {
+                        return `
+                    <div>
+                        <strong>${escape(item.book_name)}</strong>
+                        <div class="text-xs text-gray-500">
+                            ₹ ${item.mrp ?? 0}
+                        </div>
+                    </div>
+                `;
+                    }
+                },
+
+                // FIX FOR BARCODE SCANNER
+                onInitialize: function() {
+
+                    const input = this.control_input;
+
+                    input.addEventListener('keydown', (e) => {
+
+                        // scanner sends Enter/Tab after barcode
+                        if (e.key === 'Enter' || e.key === 'Tab') {
+                            e.preventDefault();
+                        }
+                    });
+
+                    // focus first product field
+                    setTimeout(() => {
+                        this.focus();
+                    }, 100);
+                },
+
+                onItemAdd: function(value) {
+
+                    const row = selectElement.closest('.product-row');
+
+                    row.dataset.productId = value;
+
+                    const selected = this.options[value];
+
+                    const qtyInput = row.querySelector('.quantity-input');
+
+                    const priceInput = row.querySelector('.purchase-price');
+
+                    const qty = parseFloat(qtyInput.value || 1);
+
+                    const mrp = parseFloat(selected.mrp || 0);
+
+                    priceInput.value = (qty * mrp).toFixed(2);
+
+                    calculateTotal();
+
+                    // keep cursor ready for next scan
+                    setTimeout(() => {
+
+                        this.control_input.value = '';
+
+                        this.focus();
+
+                    }, 50);
+                }
+            });
+
+            // store instance
+            selectElement.tomselect = tom;
+
+            const row = selectElement.closest('.product-row');
+
+            const editBtn = row.querySelector('.edit-product-btn');
+
+            editBtn.addEventListener('click', function() {
+
+                const productId = row.dataset.productId;
+
+                if (!productId) {
+                    alert('Please select product first');
+                    return;
+                }
+
+                window.open(`/products/${productId}/edit?generate_barcode=1`, '_blank');
+            });
+
+            row.querySelector('.quantity-input').addEventListener('input', function() {
+
+                const product = tom.options[tom.getValue()];
+
+                if (!product) return;
+
+                const qty = parseFloat(this.value || 1);
+
+                const mrp = parseFloat(product.mrp || 0);
+
+                row.querySelector('.purchase-price').value =
+                    (qty * mrp).toFixed(2);
+
+                calculateTotal();
+            });
+
+            row.querySelector('.purchase-price').addEventListener('input', function() {
+
+                calculateTotal();
+
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            document.querySelectorAll('.product-select').forEach(select => {
+
+                createTomSelect(select);
+
+            });
+
+            // focus first product field initially
+            setTimeout(() => {
+
+                const firstSelect =
+                    document.querySelector('.product-select').tomselect;
+
+                if (firstSelect) {
+                    firstSelect.focus();
+                }
+
+            }, 200);
+
+        });
+
+        function addProductRow() {
+
+            const container = document.getElementById('productRows');
+
+            const row = document.createElement('div');
+
+            row.className =
+                'product-row grid grid-cols-1 md:grid-cols-13 gap-3 items-end';
+
+            row.innerHTML = `
+
+        <div class="md:col-span-5">
+            <label class="label">Product</label>
+
+            <select name="products[${productIndex}][product_id]"
+                class="product-select w-full"
+                required>
+            </select>
+        </div>
+
+        <div class="md:col-span-2">
+            <label class="label">Qty</label>
+
+            <input type="number"
+                name="products[${productIndex}][quantity]"
+                class="input input-bordered w-full quantity-input"
+                min="1"
+                value="1"
+                required />
+        </div>
+
+        <div class="md:col-span-3">
+            <label class="label">Purchase Price</label>
+
+            <input type="number"
+                step="0.01"
+                name="products[${productIndex}][purchase_price]"
+                class="input input-bordered w-full purchase-price"
+                placeholder="Price"
+                required />
+        </div>
+
+        <div class="md:col-span-1">
+        <button type="button" class="btn btn-info w-full generate-barcode-btn">
+            <i class="fa-solid fa-barcode"></i>
+        </button>
+        </div>
+
+        <div class="md:col-span-1">
+            <button type="button" class="btn btn-warning w-full edit-product-btn">
+            <i class="fa-solid fa-pen"></i>
+        </button>
+        </div>
+
+        <div class="md:col-span-1">
+            <button type="button"
+                class="btn btn-error w-full"
+                onclick="removeProductRow(this)">
+
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+    `;
+
+            container.appendChild(row);
+
+            const newSelect = row.querySelector('.product-select');
+
+            createTomSelect(newSelect);
+
+            setTimeout(() => {
+                newSelect.tomselect.focus();
+            }, 100);
 
             productIndex++;
         }
