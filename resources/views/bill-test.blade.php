@@ -309,7 +309,7 @@
 
                         <td class="price">{{ number_format($item->mrp, 0) }}</td>
 
-                        <td class="amount">{{ number_format($item->selling_price, 0) }}</td>
+                        <td class="amount">{{ number_format($item->net_amount, 0) }}</td>
                     </tr>
                 @endforeach
 
