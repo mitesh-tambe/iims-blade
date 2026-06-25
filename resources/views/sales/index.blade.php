@@ -8,6 +8,12 @@
             <x-search-bar action="{{ route('sales.index') }}" placeholder="Search..." />
         </div>
 
+        @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
         {{-- 📋 Sales Table --}}
         <table class="table">
             <thead>
@@ -41,7 +47,8 @@
                         <td class="text-right space-x-1">
 
                             {{-- 👁 View --}}
-                            <a href="{{ route('sales.show', $sale) }}" class="btn btn-xs btn-info">
+                            <a href="{{ route('sales.show', $sale) }}" class="btn btn-xs btn-info" target="_blank"
+                                rel="noopener noreferrer">
                                 <i class="fa-solid fa-eye"></i>
                             </a>
 
@@ -78,23 +85,22 @@
         {{ $sales->links() }}
     </div>
 
-    {{-- 🔹 CREATE MODAL --}}
-    {{-- @include('authors.partials.create-author-modal') --}}
 
-    {{-- 🔹 EDIT MODAL --}}
-    {{-- @include('authors.partials.edit-author-modal') --}}
+    @if (session('print_bill'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
 
-    {{-- 🔹 VIEW MODAL --}}
-    {{-- @include('authors.partials.view-author-modal') --}}
+                setTimeout(() => {
 
-    {{-- 🔔 TOAST --}}
-    {{-- @include('components.toast') --}}
+                    window.open(
+                        @json(session('print_bill')),
+                        '_blank'
+                    );
 
-    {{-- <script>
-        function openViewAuthor(name) {
-            document.getElementById('view_author_name').value = name;
-            view_author.showModal();
-        }
-    </script> --}}
+                }, 100);
+
+            });
+        </script>
+    @endif
 
 </x-app-layout>

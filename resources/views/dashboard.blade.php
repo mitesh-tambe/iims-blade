@@ -54,7 +54,7 @@
     <section class="py-8">
         <div class="container mx-auto px-5">
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-6">
 
                 <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
                     <div class="flex items-center justify-between mb-4">
@@ -87,10 +87,66 @@
                             </div>
 
                             <div>
+                                <label class="label">Customer Name</label>
+
+                                <input type="text" name="name" class="input input-bordered w-full"
+                                    value="{{ old('name') }}" placeholder="Enter customer name" required />
+
+                                @error('name')
+                                    <p class="text-error text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="label">Contact No</label>
+
+                                <input type="number" name="phone" class="input input-bordered w-full"
+                                    value="{{ old('phone') }}" placeholder="Enter contact number" required />
+
+                                @error('phone')
+                                    <p class="text-error text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="label">Payment mode</label>
+
+                                <select name="payment_mode" class="select select-bordered w-full" required>
+
+                                    <option value="">Select</option>
+
+                                    <option value="Cash"
+                                        {{ old('payment_mode', $sale->payment_mode ?? '') == 'Cash' ? 'selected' : '' }}>
+                                        Cash
+                                    </option>
+
+                                    <option value="UPI"
+                                        {{ old('payment_mode', $sale->payment_mode ?? '') == 'UPI' ? 'selected' : '' }}>
+                                        UPI
+                                    </option>
+
+                                    <option value="Cheque"
+                                        {{ old('payment_mode', $sale->payment_mode ?? '') == 'Cheque' ? 'selected' : '' }}>
+                                        Cheque
+                                    </option>
+
+                                    <option value="NEFT"
+                                        {{ old('payment_mode', $sale->payment_mode ?? '') == 'NEFT' ? 'selected' : '' }}>
+                                        NEFT
+                                    </option>
+
+                                </select>
+
+                                @error('payment_mode')
+                                    <p class="text-error text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
                                 <label class="label">Total Amt</label>
 
                                 <input type="text" name="total_amount" class="input input-bordered w-full"
-                                    value="{{ old('total_amount') }}" placeholder="Enter invoice number" required />
+                                    value="{{ old('total_amount') }}" required />
 
                                 @error('total_amount')
                                     <p class="text-error text-sm mt-1">{{ $message }}</p>
@@ -123,26 +179,37 @@
                                     </div>
 
                                     {{-- Quantity --}}
-                                    <div class="md:col-span-2">
+                                    <div class="md:col-span-1">
                                         <label class="label">Qty</label>
-
-                                        {{-- <input type="number" name="products[0][quantity]" class="input input-bordered w-full"
-                                    min="1" value="1" required /> --}}
 
                                         <input type="number" name="products[0][quantity]"
                                             class="quantity-input input input-bordered w-full" min="1"
                                             value="1" required />
                                     </div>
 
-                                    {{-- Purchase Price --}}
-                                    <div class="md:col-span-3">
-                                        <label class="label">MRP</label>
+                                    {{-- Discount --}}
+                                    <div class="md:col-span-1">
+                                        <label class="label">Disc %</label>
 
-                                        {{-- <input type="number" step="0.01" name="products[0][purchase_price]"
-                                    class="input input-bordered w-full" placeholder="Price" required /> --}}
+                                        <input type="number" name="products[0][discount]"
+                                            class="discount-input input input-bordered w-full" />
+                                    </div>
+
+                                    {{-- Mrp --}}
+                                    <div class="md:col-span-2">
+                                        <label class="label">MRP</label>
 
                                         <input type="number" step="0.01" name="products[0][purchase_price]"
                                             class="purchase-price input input-bordered w-full" placeholder="Price"
+                                            required />
+                                    </div>
+
+                                    {{-- amount --}}
+                                    <div class="md:col-span-2">
+                                        <label class="label">Amt</label>
+
+                                        <input type="number" step="0.01" name="products[0][net_amount]"
+                                            class="net_amount input input-bordered w-full" placeholder="Amt" readonly
                                             required />
                                     </div>
 
@@ -291,20 +358,17 @@
                     }
                 },
 
-                // FIX FOR BARCODE SCANNER
                 onInitialize: function() {
 
                     const input = this.control_input;
 
                     input.addEventListener('keydown', (e) => {
 
-                        // scanner sends Enter/Tab after barcode
                         if (e.key === 'Enter' || e.key === 'Tab') {
                             e.preventDefault();
                         }
                     });
 
-                    // focus first product field
                     setTimeout(() => {
                         this.focus();
                     }, 100);
@@ -328,9 +392,8 @@
 
                     priceInput.value = (qty * mrp).toFixed(2);
 
-                    calculateTotal();
+                    calculateRowAmount(row);
 
-                    // keep cursor ready for next scan
                     setTimeout(() => {
 
                         this.control_input.value = '';
@@ -341,7 +404,6 @@
                 }
             });
 
-            // store instance
             selectElement.tomselect = tom;
 
             const row = selectElement.closest('.product-row');
@@ -360,27 +422,63 @@
                 window.open(`/products/${productId}/edit?generate_barcode=1`, '_blank');
             });
 
-            row.querySelector('.quantity-input').addEventListener('input', function() {
+            row.querySelector('.quantity-input')
+                .addEventListener('input', function() {
 
-                const product = tom.options[tom.getValue()];
+                    const product = tom.options[tom.getValue()];
 
-                if (!product) return;
+                    if (!product) return;
 
-                const qty = parseFloat(this.value || 1);
+                    const qty = parseFloat(this.value || 1);
 
-                const mrp = parseFloat(product.mrp || 0);
+                    const mrp = parseFloat(product.mrp || 0);
 
-                row.querySelector('.purchase-price').value =
-                    (qty * mrp).toFixed(2);
+                    row.querySelector('.purchase-price').value =
+                        (qty * mrp).toFixed(2);
 
-                calculateTotal();
-            });
+                    calculateRowAmount(row);
+                });
 
-            row.querySelector('.purchase-price').addEventListener('input', function() {
+            row.querySelector('.discount-input')
+                ?.addEventListener('input', function() {
 
-                calculateTotal();
+                    calculateRowAmount(row);
 
-            });
+                });
+
+            row.querySelector('.purchase-price')
+                .addEventListener('input', function() {
+
+                    calculateRowAmount(row);
+
+                });
+        }
+
+        function calculateRowAmount(row) {
+
+            const mrp =
+                parseFloat(
+                    row.querySelector('.purchase-price')?.value || 0
+                );
+
+            const discount =
+                parseFloat(
+                    row.querySelector('.discount-input')?.value || 0
+                );
+
+            const netAmountInput =
+                row.querySelector('.net_amount');
+
+            const discountAmount =
+                (mrp * discount) / 100;
+
+            const netAmount =
+                mrp - discountAmount;
+
+            netAmountInput.value =
+                netAmount.toFixed(2);
+
+            calculateTotal();
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -391,11 +489,10 @@
 
             });
 
-            // focus first product field initially
             setTimeout(() => {
 
                 const firstSelect =
-                    document.querySelector('.product-select').tomselect;
+                    document.querySelector('.product-select')?.tomselect;
 
                 if (firstSelect) {
                     firstSelect.focus();
@@ -415,7 +512,6 @@
                 'product-row grid grid-cols-1 md:grid-cols-13 gap-3 items-end';
 
             row.innerHTML = `
-
         <div class="md:col-span-5">
             <label class="label">Product</label>
 
@@ -425,7 +521,7 @@
             </select>
         </div>
 
-        <div class="md:col-span-2">
+        <div class="md:col-span-1">
             <label class="label">Qty</label>
 
             <input type="number"
@@ -436,8 +532,17 @@
                 required />
         </div>
 
-        <div class="md:col-span-3">
-            <label class="label">Purchase Price</label>
+        <div class="md:col-span-1">
+            <label class="label">Disc %</label>
+
+            <input type="number"
+                name="products[${productIndex}][discount]"
+                class="input input-bordered w-full discount-input"
+                value="0"/>
+        </div>
+
+        <div class="md:col-span-2">
+            <label class="label">MRP</label>
 
             <input type="number"
                 step="0.01"
@@ -447,21 +552,31 @@
                 required />
         </div>
 
+        <div class="md:col-span-2">
+            <label class="label">Amt</label>
+
+            <input type="number"
+                step="0.01"
+                name="products[${productIndex}][net_amount]"
+                class="input input-bordered w-full net_amount"
+                placeholder="Amt"
+                readonly />
+        </div>
+
         <div class="md:col-span-1">
             <button type="button" class="btn btn-warning w-full edit-product-btn">
-            <i class="fa-solid fa-pen"></i>
-        </button>
+                <i class="fa-solid fa-pen"></i>
+            </button>
         </div>
 
         <div class="md:col-span-1">
             <button type="button"
                 class="btn btn-error w-full"
                 onclick="removeProductRow(this)">
-
                 <i class="fa-solid fa-trash"></i>
             </button>
         </div>
-    `;
+        `;
 
             container.appendChild(row);
 
@@ -485,13 +600,15 @@
             }
 
             button.closest('.product-row').remove();
+
+            calculateTotal();
         }
 
         function calculateTotal() {
 
             let total = 0;
 
-            document.querySelectorAll('.purchase-price').forEach(input => {
+            document.querySelectorAll('.net_amount').forEach(input => {
 
                 total += parseFloat(input.value || 0);
 
@@ -500,7 +617,6 @@
             document.querySelector('input[name="total_amount"]').value =
                 total.toFixed(2);
         }
-
 
         window.addEventListener('storage', async function(event) {
 
@@ -541,9 +657,7 @@
                     row.querySelector('.purchase-price').value =
                         (qty * parseFloat(product.mrp)).toFixed(2);
 
-                    calculateTotal();
-
-                    console.log('storage fired', event);
+                    calculateRowAmount(row);
 
                 } catch (e) {
 

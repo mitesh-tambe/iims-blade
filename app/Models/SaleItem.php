@@ -13,6 +13,8 @@ class SaleItem extends Model
         'quantity',
         'selling_price',
         'mrp',
+        'discount',
+        'net_amount'
     ];
 
     public function sale(): BelongsTo

@@ -114,9 +114,19 @@
         th:first-child,
         td:first-child {
 
-            width: 65%;
+            width: 55%;
 
             padding-right: 4px;
+        }
+
+        /* Discount */
+        .discount {
+
+            width: 10%;
+
+            text-align: center;
+
+            white-space: nowrap;
         }
 
         /* Qty */
@@ -230,11 +240,7 @@
             </div>
 
             <div class="small-text">
-                Ph: 1234567890
-            </div>
-
-            <div class="small-text">
-                GSTIN: 27AAAAA0000A1Z5
+                Ph: +91 72082 26020
             </div>
 
         </div>
@@ -266,9 +272,12 @@
             </div>
 
             <div>
-                Customer: Walk In Customer
+                Customer: {{ $sale->customer?->name ?: 'Walk In Customer' }}
             </div>
 
+            <div>
+                Contact No: {{ $sale->customer?->phone ?: '-' }}
+            </div>
         </div>
 
         <div class="divider"></div>
@@ -281,6 +290,7 @@
                 <tr>
                     <th>Item</th>
                     <th class="qty">Qty</th>
+                    <th class="discount">%</th>
                     <th class="price">MRP</th>
                     <th class="amount">Amt</th>
                 </tr>
@@ -295,6 +305,8 @@
 
                         <td class="qty">{{ $item->quantity }}</td>
 
+                        <td class="discount">{{ $item->discount }}</td>
+
                         <td class="price">{{ number_format($item->mrp, 0) }}</td>
 
                         <td class="amount">{{ number_format($item->selling_price, 0) }}</td>
@@ -308,47 +320,35 @@
         <div class="divider"></div>
 
         {{-- TOTALS --}}
-        <div class="totals">
 
-            <div class="totals-row">
-                <span>Subtotal</span>
-                <span>₹ {{ $sale->total_amount }}</span>
-            </div>
-
-            <div class="totals-row">
-                <span>CGST</span>
-                <span>₹0</span>
-            </div>
-
-            <div class="totals-row">
-                <span>SGST</span>
-                <span>₹0</span>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="totals-row grand-total">
-                <span>Total</span>
-                <span>₹ {{ $sale->total_amount }}</span>
-            </div>
-
+        <div class="totals-row grand-total">
+            <span>Total</span>
+            <span>₹ {{ $sale->total_amount }}</span>
         </div>
 
-        <div class="divider"></div>
+    </div>
 
-        {{-- PAYMENT --}}
-        <div class="small-text">
+    <div class="divider"></div>
 
-            Payment Mode: CASH
+    {{-- PAYMENT --}}
+    <div class="small-text">
 
-        </div>
+        Payment Mode: CASH
 
-        {{-- FOOTER --}}
-        <div class="footer">
+    </div>
 
-            THANK YOU! VISIT AGAIN!
+    <div class="small-text">
 
-        </div>
+        Created by: {{ $sale->creator?->name ?? '-' }}
+
+    </div>
+
+    {{-- FOOTER --}}
+    <div class="footer">
+
+        THANK YOU! VISIT AGAIN!
+
+    </div>
 
     </div>
 
