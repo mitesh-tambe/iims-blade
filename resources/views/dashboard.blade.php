@@ -71,7 +71,7 @@
                                 <label class="label">Invoice No</label>
 
                                 <input type="text" name="invoice_no" class="input input-bordered w-full"
-                                    value="{{ old('invoice_no') }}" placeholder="Enter invoice number" required />
+                                    value="{{ old('invoice_no', $invoiceNo) }}" placeholder="Enter invoice number" required readonly/>
 
                                 @error('invoice_no')
                                     <p class="text-error text-sm mt-1">{{ $message }}</p>

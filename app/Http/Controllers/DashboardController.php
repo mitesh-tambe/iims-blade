@@ -22,7 +22,7 @@ class DashboardController extends Controller
             'categoriesCount'   => Category::count(),
             'racksCount'         => Rack::count(),
             'sales' => $sales,
+            'invoiceNo'         => Sale::generateInvoiceNo(),
         ]);
     }
 }
-

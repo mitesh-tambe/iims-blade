@@ -61,7 +61,6 @@
                                 onsubmit="return confirm('Are you sure you want to delete this sale record?')">
                                 @csrf
                                 @method('DELETE')
-
                                 <button type="submit" class="btn btn-xs btn-error tooltip" data-tip="Delete">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>

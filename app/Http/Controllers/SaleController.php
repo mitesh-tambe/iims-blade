@@ -41,7 +41,7 @@ class SaleController extends Controller
             'name' => 'nullable|string|max:255',
             'phone' => 'nullable|digits_between:1,12',
 
-            'invoice_no' => 'required|string|unique:sales,invoice_no',
+            // 'invoice_no' => 'required|string|unique:sales,invoice_no',
             'sale_date' => 'nullable|date',
             'total_amount' => 'required|numeric|min:0',
             'payment_mode' => 'nullable|string|max:50',
@@ -73,7 +73,7 @@ class SaleController extends Controller
             }
             $sale = Sale::create([
                 'customer_id' => $customerId,
-                'invoice_no' => $validated['invoice_no'],
+                // 'invoice_no' => $validated['invoice_no'],
                 'total_amount' => $validated['total_amount'],
                 'payment_mode' => $validated['payment_mode'],
                 'sale_date' => $validated['sale_date'] ?? now(),
@@ -132,7 +132,7 @@ class SaleController extends Controller
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
             'phone' => 'nullable|digits_between:1,12',
-            'invoice_no' => 'required|string|unique:sales,invoice_no,' . $sale->id,
+            // 'invoice_no' => 'required|string|unique:sales,invoice_no,' . $sale->id,
             'sale_date' => 'nullable|date',
             'total_amount' => 'required|numeric|min:0',
             'payment_mode' => 'nullable|string|max:50',
@@ -164,7 +164,7 @@ class SaleController extends Controller
             }
             $sale->update([
                 'customer_id' => $customerId,
-                'invoice_no' => $validated['invoice_no'],
+                // 'invoice_no' => $validated['invoice_no'],
                 'sale_date' => $validated['sale_date'],
                 'total_amount' => $validated['total_amount'],
                 'payment_mode' => $validated['payment_mode'],
@@ -201,8 +201,14 @@ class SaleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Sale $sale)
+    public function destroy($id)
     {
-        //
+        $sale = Sale::findOrFail($id);
+
+        $sale->delete();
+
+        return redirect()
+            ->route('sales.index')
+            ->with('success', 'Sale deleted successfully.');
     }
 }
