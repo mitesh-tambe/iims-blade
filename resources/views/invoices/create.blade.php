@@ -4,9 +4,16 @@
             @csrf
 
             <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-6 space-y-4">
-                <legend class="fieldset-legend text-lg font-semibold">
-                    Invoice Details
-                </legend>
+                <div class="flex items-center justify-between">
+                    <legend class="fieldset-legend text-lg font-semibold">
+                        Invoice Details
+                    </legend>
+
+                    <a href="{{ route('products.create') }}" class="btn btn-primary" target="_blank"
+                        rel="noopener noreferrer">
+                        Create New Product
+                    </a>
+                </div>
 
                 {{-- BASIC DETAILS --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -28,7 +35,7 @@
                         <label class="label">Purchase Date</label>
 
                         <input type="date" name="purchase_date" class="input input-bordered w-full"
-                            value="{{ old('purchase_date') }}" />
+                            value="{{ old('purchase_date', isset($purchase) ? $purchase->purchase_date->format('Y-m-d') : '') }}">
                     </div>
 
                     {{-- Vendor --}}
