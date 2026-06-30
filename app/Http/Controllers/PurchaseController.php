@@ -19,8 +19,7 @@ class PurchaseController extends Controller
     {
         $datePrefix = now()->format('dmy');
 
-        $latestInvoice = Purchase::withTrashed()
-            ->where('ref_no', 'like', $datePrefix . '%')
+        $latestInvoice = Purchase::where('ref_no', 'like', $datePrefix . '%')
             ->orderByDesc('ref_no')
             ->first();
 
