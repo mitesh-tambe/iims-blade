@@ -70,9 +70,26 @@
         edit_category.close();
 
         // 🔄 Update table row instantly
+        // const row = document.querySelector(`[data-category-id="${id}"]`);
+        // if (row) {
+        //     row.querySelector('.category-name').innerText = data.category.name;
+        // }
+
         const row = document.querySelector(`[data-category-id="${id}"]`);
         if (row) {
             row.querySelector('.category-name').innerText = data.category.name;
+
+            // Update edit button onclick value
+            const editButton = row.querySelector('.btn-warning');
+
+            if (editButton) {
+
+                editButton.setAttribute(
+                    'onclick',
+                    `openEditCategory(${data.category.id}, '${data.category.name.replace(/'/g, "\\'")}')`
+                );
+
+            }
         }
 
         showToast(data.message);

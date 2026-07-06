@@ -52,19 +52,21 @@
                                 <i class="fa-solid fa-eye"></i>
                             </a>
 
-                            {{-- ✏️ Edit --}}
-                            <a href="{{ route('sales.edit', $sale) }}" class="btn btn-xs btn-warning">
-                                <i class="fa-solid fa-pencil"></i>
-                            </a>
+                            @if (auth()->user()->email === 'admin@gmail.com')
+                                {{-- ✏️ Edit --}}
+                                <a href="{{ route('sales.edit', $sale) }}" class="btn btn-xs btn-warning">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </a>
 
-                            <form action="{{ route('sales.destroy', $sale->id) }}" method="POST" class="inline"
-                                onsubmit="return confirm('Are you sure you want to delete this sale record?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-xs btn-error tooltip" data-tip="Delete">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </form>
+                                <form action="{{ route('sales.destroy', $sale->id) }}" method="POST" class="inline"
+                                    onsubmit="return confirm('Are you sure you want to delete this sale record?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-xs btn-error tooltip" data-tip="Delete">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            @endif
 
                         </td>
 

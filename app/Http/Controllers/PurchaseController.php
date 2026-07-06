@@ -61,7 +61,6 @@ class PurchaseController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
         $validated = $request->validate([
 
             'invoice_no' => 'required|string|max:255',
@@ -105,37 +104,16 @@ class PurchaseController extends Controller
             // Purchase Items
             foreach ($validated['products'] as $item) {
 
-                $productId = $item['product_id'];
-
-                $quantity = (int) $item['quantity'];
-
-                $totalPrice = (float) $item['purchase_price'];
-
-                // Per Piece Cost
-                $unitCost =
-                    $quantity > 0
-                    ? ($totalPrice / $quantity)
-                    : 0;
-
-                // Create Purchase Item
                 PurchaseItem::create([
 
                     'purchase_id' => $purchase->id,
 
-                    'product_id' => $productId,
+                    'product_id' => $item['product_id'],
 
-                    'quantity' => $quantity,
+                    'quantity' => (int) $item['quantity'],
 
-                    'cost_price' => $unitCost,
+                    'cost_price' => (float) $item['purchase_price'],
                 ]);
-
-                // OPTIONAL:
-                // Update product stock if you add stock column later
-
-                /*
-            Product::where('id', $productId)
-                ->increment('stock', $quantity);
-            */
             }
 
             DB::commit();
@@ -232,27 +210,15 @@ class PurchaseController extends Controller
             // Recreate Items
             foreach ($validated['products'] as $item) {
 
-                $productId = $item['product_id'];
-
-                $quantity = (int) $item['quantity'];
-
-                $totalPrice = (float) $item['purchase_price'];
-
-                // Per Piece Cost
-                $unitCost =
-                    $quantity > 0
-                    ? ($totalPrice / $quantity)
-                    : 0;
-
                 PurchaseItem::create([
 
                     'purchase_id' => $purchase->id,
 
-                    'product_id' => $productId,
+                    'product_id' => $item['product_id'],
 
-                    'quantity' => $quantity,
+                    'quantity' => (int) $item['quantity'],
 
-                    'cost_price' => $unitCost,
+                    'cost_price' => (float) $item['purchase_price'],
 
                 ]);
             }

@@ -96,9 +96,8 @@ class PublicationController extends Controller
      */
     public function destroy(Publication $publication)
     {
-        $publication->delete();
+        $publication->delete(); // 👈 soft delete
 
-        return redirect()->route('publications.index')
-            ->with('success', 'Publication deleted successfully!');
+        return redirect()->back()->with('success', 'Publication deleted successfully!');
     }
 }

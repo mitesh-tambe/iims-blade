@@ -83,6 +83,18 @@
             const row = document.querySelector(`[data-publication-id="${id}"]`);
             if (row) {
                 row.querySelector('.publication-name').innerText = data.publication.name;
+
+                // Update edit button onclick value
+                const editButton = row.querySelector('.btn-warning');
+
+                if (editButton) {
+
+                    editButton.setAttribute(
+                        'onclick',
+                        `openEditPublication(${data.publication.id}, '${data.publication.name.replace(/'/g, "\\'")}')`
+                    );
+
+                }
             }
 
             // 🔔 Toast

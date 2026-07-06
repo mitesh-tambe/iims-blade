@@ -208,13 +208,9 @@
                 ],
 
                 create: false,
-
                 preload: false,
-
                 maxOptions: 20,
-
                 placeholder: 'Search Product / ISBN / Barcode...',
-
                 loadThrottle: 100,
 
                 load: function(query, callback) {
@@ -234,26 +230,26 @@
                                 this.addOption(json[0]);
 
                                 this.setValue(json[0].id);
+
                             }
 
                         })
-                        .catch(() => {
-                            callback();
-                        });
+                        .catch(() => callback());
+
                 },
 
                 render: {
                     option: function(item, escape) {
 
                         return `
-                            <div>
-                                <strong>${escape(item.book_name)}</strong>
+                    <div>
+                        <strong>${escape(item.book_name)}</strong>
 
-                                <div class="text-xs text-gray-500">
-                                    ₹ ${item.mrp ?? 0}
-                                </div>
-                            </div>
-                        `;
+                        <div class="text-xs text-gray-500">
+                            ₹ ${item.mrp ?? 0}
+                        </div>
+                    </div>
+                `;
                     }
                 },
 
@@ -265,27 +261,48 @@
 
                     const selected = this.options[value];
 
-                    const qtyInput = row.querySelector('.quantity-input');
+                    const qtyInput =
+                        row.querySelector('.quantity-input');
 
-                    const priceInput = row.querySelector('.purchase-price');
+                    const priceInput =
+                        row.querySelector('.purchase-price');
 
-                    const qty = parseFloat(qtyInput.value || 1);
+                    const qty =
+                        parseFloat(qtyInput.value || 1);
 
-                    const mrp = parseFloat(selected.mrp || 0);
+                    const mrp =
+                        parseFloat(selected.mrp || 0);
 
-                    priceInput.value = (qty * mrp).toFixed(2);
+                    // row total price
+                    priceInput.value =
+                        (qty * mrp).toFixed(2);
+
+                    qtyInput.dataset.lastQty = qty;
 
                     calculateTotal();
+
                 }
+
             });
 
             const row = selectElement.closest('.product-row');
 
-            const editBtn = row.querySelector('.edit-product-btn');
+            const qtyInput =
+                row.querySelector('.quantity-input');
+
+            const priceInput =
+                row.querySelector('.purchase-price');
+
+            qtyInput.dataset.lastQty =
+                qtyInput.value;
+
+            const editBtn =
+                row.querySelector('.edit-product-btn');
 
             editBtn.addEventListener('click', function() {
 
-                const productId = row.dataset.productId;
+                const productId =
+                    row.dataset.productId;
 
                 if (!productId) {
 
@@ -294,151 +311,180 @@
                     return;
                 }
 
-                window.open(`/products/${productId}/edit`, '_blank');
+                window.open(
+                    `/products/${productId}/edit`,
+                    '_blank'
+                );
+
             });
 
-            row.querySelector('.quantity-input')
-                .addEventListener('input', function() {
+            qtyInput.addEventListener('input', function() {
 
-                    const product = tom.options[tom.getValue()];
+                const newQty =
+                    parseFloat(this.value || 1);
 
-                    if (!product) return;
+                const oldQty =
+                    parseFloat(this.dataset.lastQty || 1);
 
-                    const qty = parseFloat(this.value || 1);
+                const currentPrice =
+                    parseFloat(priceInput.value || 0);
 
-                    const mrp = parseFloat(product.mrp || 0);
+                const unitPrice =
+                    currentPrice / oldQty;
 
-                    row.querySelector('.purchase-price').value =
-                        (qty * mrp).toFixed(2);
+                const newPrice =
+                    unitPrice * newQty;
 
-                    calculateTotal();
-                });
+                priceInput.value =
+                    newPrice.toFixed(2);
 
-            row.querySelector('.purchase-price')
-                .addEventListener('input', function() {
+                this.dataset.lastQty =
+                    newQty;
 
-                    calculateTotal();
+                calculateTotal();
 
-                });
+            });
+
+            priceInput.addEventListener('input', function() {
+
+                calculateTotal();
+
+            });
+
         }
 
         document.addEventListener('DOMContentLoaded', function() {
 
-            document.querySelectorAll('.product-select').forEach(select => {
+            document.querySelectorAll('.product-select')
+                .forEach(select => {
 
-                createTomSelect(select);
+                    createTomSelect(select);
 
-            });
+                });
 
             calculateTotal();
+
         });
 
         function addProductRow() {
 
-            const container = document.getElementById('productRows');
+            const container =
+                document.getElementById('productRows');
 
-            const row = document.createElement('div');
+            const row =
+                document.createElement('div');
 
             row.className =
                 'product-row grid grid-cols-1 md:grid-cols-13 gap-3 items-end';
 
             row.innerHTML = `
 
-                <div class="md:col-span-5">
+        <div class="md:col-span-5">
 
-                    <label class="label">Product</label>
+            <label class="label">Product</label>
 
-                    <select name="products[${productIndex}][product_id]"
-                        class="product-select w-full"
-                        required>
-                    </select>
+            <select
+                name="products[${productIndex}][product_id]"
+                class="product-select w-full"
+                required>
+            </select>
 
-                </div>
+        </div>
 
-                <div class="md:col-span-2">
+        <div class="md:col-span-2">
 
-                    <label class="label">Qty</label>
+            <label class="label">Qty</label>
 
-                    <input type="number"
-                        name="products[${productIndex}][quantity]"
-                        class="input input-bordered w-full quantity-input"
-                        min="1"
-                        value="1"
-                        required />
+            <input
+                type="number"
+                name="products[${productIndex}][quantity]"
+                class="input input-bordered w-full quantity-input"
+                min="1"
+                value="1"
+                required />
 
-                </div>
+        </div>
 
-                <div class="md:col-span-3">
+        <div class="md:col-span-3">
 
-                    <label class="label">Purchase Price</label>
+            <label class="label">Purchase Price</label>
 
-                    <input type="number"
-                        step="0.01"
-                        name="products[${productIndex}][purchase_price]"
-                        class="input input-bordered w-full purchase-price"
-                        placeholder="Price"
-                        required />
+            <input
+                type="number"
+                step="0.01"
+                name="products[${productIndex}][purchase_price]"
+                class="input input-bordered w-full purchase-price"
+                placeholder="Price"
+                required />
 
-                </div>
+        </div>
 
-                <div class="md:col-span-1">
+        <div class="md:col-span-1">
 
-                    <button type="button"
-                        class="btn btn-warning w-full edit-product-btn">
+            <button
+                type="button"
+                class="btn btn-warning w-full edit-product-btn">
 
-                        <i class="fa-solid fa-pen"></i>
+                <i class="fa-solid fa-pen"></i>
 
-                    </button>
+            </button>
 
-                </div>
+        </div>
 
-                <div class="md:col-span-1">
+        <div class="md:col-span-1">
 
-                    <button type="button"
-                        class="btn btn-error w-full"
-                        onclick="removeProductRow(this)">
+            <button
+                type="button"
+                class="btn btn-error w-full"
+                onclick="removeProductRow(this)">
 
-                        <i class="fa-solid fa-trash"></i>
+                <i class="fa-solid fa-trash"></i>
 
-                    </button>
+            </button>
 
-                </div>
-            `;
+        </div>
+        `;
 
             container.appendChild(row);
 
-            const newSelect = row.querySelector('.product-select');
-
-            createTomSelect(newSelect);
+            createTomSelect(
+                row.querySelector('.product-select')
+            );
 
             productIndex++;
+
         }
 
         function removeProductRow(button) {
 
-            const rows = document.querySelectorAll('.product-row');
+            const rows =
+                document.querySelectorAll('.product-row');
 
-            if (rows.length === 1) {
-                return;
-            }
+            if (rows.length === 1) return;
 
             button.closest('.product-row').remove();
 
             calculateTotal();
+
         }
 
         function calculateTotal() {
 
             let total = 0;
 
-            document.querySelectorAll('.purchase-price').forEach(input => {
+            document.querySelectorAll(
+                '.purchase-price'
+            ).forEach(input => {
 
-                total += parseFloat(input.value || 0);
+                total +=
+                    parseFloat(input.value || 0);
 
             });
 
-            document.querySelector('input[name="total_amount"]').value =
-                total.toFixed(2);
+            document.querySelector(
+                'input[name="total_amount"]'
+            ).value = total.toFixed(2);
+
         }
     </script>
 
