@@ -356,47 +356,95 @@ class ProductController extends Controller
     }
 
 
+    // public function export(Request $request)
+    // {
+    //     $fileName = 'products_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+
+    //     return response()->streamDownload(function () use ($request) {
+
+    //         $writer = SimpleExcelWriter::streamDownload('products.xlsx');
+
+    //         Product::with(['author', 'publication', 'language', 'category'])
+    //             ->filter($request->all())
+    //             ->orderBy('id')
+    //             ->chunk(500, function ($products) use ($writer) {
+
+    //                 foreach ($products as $product) {
+    //                     $writer->addRow([
+    //                         'ID' => $product->id,
+    //                         'Book Name' => $product->book_name,
+    //                         'ISBN' => $product->isbn,
+    //                         'Edition' => $product->edition,
+    //                         'Pages' => $product->book_pages,
+    //                         'Barcode' => $product->barcode_no,
+
+    //                         'Author' => $product->author?->name,
+    //                         'Publication' => $product->publication?->name,
+    //                         'Language' => $product->language?->name,
+    //                         'Category' => $product->category?->name,
+
+    //                         'MRP' => $product->mrp,
+    //                         'Company Discount' => $product->disc_from_company,
+    //                         'Customer Discount' => $product->disc_for_customer,
+    //                         'Company Amount' => $product->amt_company,
+    //                         'Customer Amount' => $product->amt_customer,
+
+    //                         'Rack No' => $product->rack?->name,
+    //                         'Created At' => $product->created_at?->format('Y-m-d'),
+    //                     ]);
+    //                 }
+    //             });
+
+    //         $writer->close();
+    //     }, $fileName);
+    // }
+
     public function export(Request $request)
     {
-        $fileName = 'products_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+        $writer = SimpleExcelWriter::streamDownload(
+            'products_' . now()->format('Y-m-d_H-i-s') . '.xlsx'
+        );
 
-        return response()->streamDownload(function () use ($request) {
+        Product::with([
+            'author',
+            'publication',
+            'language',
+            'category',
+            'rack'
+        ])
+            ->filter($request->all())
+            ->orderBy('id')
+            ->chunk(500, function ($products) use ($writer) {
 
-            $writer = SimpleExcelWriter::streamDownload('products.xlsx');
+                foreach ($products as $product) {
 
-            Product::with(['author', 'publication', 'language', 'category'])
-                ->filter($request->all())
-                ->orderBy('id')
-                ->chunk(500, function ($products) use ($writer) {
+                    $writer->addRow([
 
-                    foreach ($products as $product) {
-                        $writer->addRow([
-                            'ID' => $product->id,
-                            'Book Name' => $product->book_name,
-                            'ISBN' => $product->isbn,
-                            'Edition' => $product->edition,
-                            'Pages' => $product->book_pages,
-                            'Barcode' => $product->barcode_no,
+                        'ID' => $product->id,
+                        'Book Name' => $product->book_name,
+                        'ISBN' => $product->isbn,
+                        'Edition' => $product->edition,
+                        'Pages' => $product->book_pages,
+                        'Barcode' => $product->barcode_no,
 
-                            'Author' => $product->author?->name,
-                            'Publication' => $product->publication?->name,
-                            'Language' => $product->language?->name,
-                            'Category' => $product->category?->name,
+                        'Author' => $product->author?->name,
+                        'Publication' => $product->publication?->name,
+                        'Language' => $product->language?->name,
+                        'Category' => $product->category?->name,
 
-                            'MRP' => $product->mrp,
-                            'Company Discount' => $product->disc_from_company,
-                            'Customer Discount' => $product->disc_for_customer,
-                            'Company Amount' => $product->amt_company,
-                            'Customer Amount' => $product->amt_customer,
+                        'MRP' => $product->mrp,
+                        'Company Discount' => $product->disc_from_company,
+                        'Customer Discount' => $product->disc_for_customer,
+                        'Company Amount' => $product->amt_company,
+                        'Customer Amount' => $product->amt_customer,
 
-                            'Rack No' => $product->rack?->name,
-                            'Created At' => $product->created_at?->format('Y-m-d'),
-                        ]);
-                    }
-                });
+                        'Rack No' => $product->rack?->name,
+                        'Created At' => $product->created_at?->format('Y-m-d'),
+                    ]);
+                }
+            });
 
-            $writer->close();
-        }, $fileName);
+        return $writer->toBrowser();
     }
 
     public function search(Request $request)
@@ -407,25 +455,23 @@ class ProductController extends Controller
             return response()->json([]);
         }
 
-        $products = Product::query()
-
+        $products = Product::with(['author:id,name', 'publication:id,name'])
             ->where(function ($query) use ($search) {
 
                 $query->where('book_name', 'LIKE', "%{$search}%")
                     ->orWhere('isbn', 'LIKE', "%{$search}%")
                     ->orWhere('barcode_no', 'LIKE', "%{$search}%");
             })
-
             ->select(
                 'id',
                 'book_name',
                 'isbn',
                 'barcode_no',
-                'mrp'
+                'mrp',
+                'author_id',
+                'publication_id'
             )
-
             ->limit(20)
-
             ->get();
 
         return response()->json($products);

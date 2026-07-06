@@ -243,12 +243,20 @@
 
                         return `
                     <div>
-                        <strong>${escape(item.book_name)}</strong>
+    <strong>${escape(item.book_name)}</strong>
 
-                        <div class="text-xs text-gray-500">
-                            ₹ ${item.mrp ?? 0}
-                        </div>
-                    </div>
+    <div class="flex items-center gap-4 text-xs text-gray-500">
+        <span>₹ ${item.mrp ?? 0}</span>
+
+        <span>
+            ${escape(item.author?.name ?? '-')}
+        </span>
+
+        <span>
+            ${escape(item.publication?.name ?? '-')}
+        </span>
+    </div>
+</div>
                 `;
                     }
                 },
