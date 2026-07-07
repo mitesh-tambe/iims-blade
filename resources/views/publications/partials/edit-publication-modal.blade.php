@@ -84,16 +84,26 @@
             if (row) {
                 row.querySelector('.publication-name').innerText = data.publication.name;
 
-                // Update edit button onclick value
+                const escapedName = data.publication.name.replace(/'/g, "\\'");
+
+                // Update edit button
                 const editButton = row.querySelector('.btn-warning');
 
                 if (editButton) {
-
                     editButton.setAttribute(
                         'onclick',
-                        `openEditPublication(${data.publication.id}, '${data.publication.name.replace(/'/g, "\\'")}')`
+                        `openEditPublication(${data.publication.id}, '${escapedName}')`
                     );
+                }
 
+                // Update view button
+                const viewButton = row.querySelector('.btn-info');
+
+                if (viewButton) {
+                    viewButton.setAttribute(
+                        'onclick',
+                        `openViewPublication('${escapedName}')`
+                    );
                 }
             }
 

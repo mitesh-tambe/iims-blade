@@ -331,13 +331,13 @@
     <div class="divider"></div>
 
     {{-- PAYMENT --}}
-    <div class="small-text">
+    <div class="small-text" style="padding-left:2px;">
 
         Payment Mode: CASH
 
     </div>
 
-    <div class="small-text">
+    <div class="small-text" style="padding-left:2px;">
 
         Created by: {{ $sale->creator?->name ?? '-' }}
 

@@ -63,26 +63,32 @@
 
         edit_author.close();
 
-        // Update table instantly
-        // const row = document.querySelector(`[data-author-id="${id}"]`);
-        // if (row) {
-        //     row.querySelector('.author-name').innerText = data.author.name;
-        // }
+
 
         const row = document.querySelector(`[data-author-id="${id}"]`);
         if (row) {
             row.querySelector('.author-name').innerText = data.author.name;
 
-            // Update edit button onclick value
+            const escapedName = data.author.name.replace(/'/g, "\\'");
+
+            // Update edit button
             const editButton = row.querySelector('.btn-warning');
 
             if (editButton) {
-
                 editButton.setAttribute(
                     'onclick',
-                    `openEditAuthor(${data.author.id}, '${data.author.name.replace(/'/g, "\\'")}')`
+                    `openEditAuthor(${data.author.id}, '${escapedName}')`
                 );
+            }
 
+            // Update view button
+            const viewButton = row.querySelector('.btn-info');
+
+            if (viewButton) {
+                viewButton.setAttribute(
+                    'onclick',
+                    `openViewAuthor('${escapedName}')`
+                );
             }
         }
 

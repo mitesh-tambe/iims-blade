@@ -68,16 +68,26 @@
         if (row) {
             row.querySelector('.rack-name').innerText = data.rack.name;
 
-            // Update edit button onclick value
+            const escapedName = data.rack.name.replace(/'/g, "\\'");
+
+            // Update edit button
             const editButton = row.querySelector('.btn-warning');
 
             if (editButton) {
-
                 editButton.setAttribute(
                     'onclick',
-                    `openEditRack(${data.rack.id}, '${data.rack.name.replace(/'/g, "\\'")}')`
+                    `openEditRack(${data.rack.id}, '${escapedName}')`
                 );
+            }
 
+            // Update view button
+            const viewButton = row.querySelector('.btn-info');
+
+            if (viewButton) {
+                viewButton.setAttribute(
+                    'onclick',
+                    `openViewRack('${escapedName}')`
+                );
             }
         }
 

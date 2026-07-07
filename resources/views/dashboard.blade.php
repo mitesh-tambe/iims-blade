@@ -68,7 +68,7 @@
 
                             {{-- Invoice No --}}
                             <div>
-                                <label class="label">Invoice No</label>
+                                <label class="label">Invoice No *</label>
 
                                 <input type="text" name="invoice_no" class="input input-bordered w-full"
                                     value="{{ old('invoice_no', $invoiceNo) }}" placeholder="Enter invoice number"
@@ -81,17 +81,17 @@
 
                             {{-- Sale Date --}}
                             <div>
-                                <label class="label">Date</label>
+                                <label class="label">Date *</label>
 
                                 <input type="date" name="sale_date" class="input input-bordered w-full"
-                                    value="{{ old('sale_date') }}" />
+                                    value="{{ old('sale_date') }}" required />
                             </div>
 
                             <div>
                                 <label class="label">Customer Name</label>
 
                                 <input type="text" name="name" class="input input-bordered w-full"
-                                    value="{{ old('name') }}" placeholder="Enter customer name" required />
+                                    value="{{ old('name') }}" placeholder="Enter customer name"/>
 
                                 @error('name')
                                     <p class="text-error text-sm mt-1">{{ $message }}</p>
@@ -102,7 +102,7 @@
                                 <label class="label">Contact No</label>
 
                                 <input type="number" name="phone" class="input input-bordered w-full"
-                                    value="{{ old('phone') }}" placeholder="Enter contact number" required />
+                                    value="{{ old('phone') }}" placeholder="Enter contact number"/>
 
                                 @error('phone')
                                     <p class="text-error text-sm mt-1">{{ $message }}</p>
@@ -110,7 +110,7 @@
                             </div>
 
                             <div>
-                                <label class="label">Payment mode</label>
+                                <label class="label">Payment mode *</label>
 
                                 <select name="payment_mode" class="select select-bordered w-full" required>
 
@@ -144,7 +144,7 @@
                             </div>
 
                             <div>
-                                <label class="label">Total Amt</label>
+                                <label class="label">Total Amt *</label>
 
                                 <input type="text" name="total_amount" class="input input-bordered w-full"
                                     value="{{ old('total_amount') }}" required />
