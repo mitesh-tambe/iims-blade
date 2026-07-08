@@ -486,8 +486,7 @@
             const netAmount =
                 mrp - discountAmount;
 
-            netAmountInput.value =
-                netAmount.toFixed(2);
+            netAmountInput.value = Math.round(netAmount).toFixed(2);
 
             calculateTotal();
         }

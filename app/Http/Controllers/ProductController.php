@@ -460,13 +460,7 @@ class ProductController extends Controller
 
                 $query->where('book_name', 'LIKE', "%{$search}%")
                     ->orWhere('isbn', 'LIKE', "%{$search}%")
-                    ->orWhere('barcode_no', 'LIKE', "%{$search}%")
-                    ->orWhereHas('author', function ($q) use ($search) {
-                        $q->where('name', 'LIKE', "%{$search}%");
-                    })
-                    ->orWhereHas('publication', function ($q) use ($search) {
-                        $q->where('name', 'LIKE', "%{$search}%");
-                    });
+                    ->orWhere('barcode_no', 'LIKE', "%{$search}%");
             })
             ->select(
                 'id',

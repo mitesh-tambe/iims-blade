@@ -455,11 +455,9 @@
                 labelField: 'book_name',
 
                 searchField: [
-                    // 'book_name',
-                    // 'isbn',
-                    // 'barcode_no',
-                    // 'author.name',
-                    // 'publication.name'
+                    'book_name',
+                    'isbn',
+                    'barcode_no'
                 ],
 
                 create: false,
@@ -468,7 +466,7 @@
 
                 maxOptions: 20,
 
-                placeholder: 'Search Product / Author / Publication / ISBN / Barcode...',
+                placeholder: 'Search Product / ISBN / Barcode...',
 
                 loadThrottle: 100,
 
