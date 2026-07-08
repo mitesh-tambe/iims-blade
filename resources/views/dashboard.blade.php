@@ -193,7 +193,7 @@
                                     <div class="md:col-span-1">
                                         <label class="label">Disc %</label>
 
-                                        <input type="number" name="products[0][discount]"
+                                        <input type="number" step="0.01" name="products[0][discount]"
                                             class="discount-input input input-bordered w-full" />
                                     </div>
 
@@ -545,7 +545,7 @@
         <div class="md:col-span-1">
             <label class="label">Disc %</label>
 
-            <input type="number"
+            <input type="number" step="0.01"
                 name="products[${productIndex}][discount]"
                 class="input input-bordered w-full discount-input"
                 value="0"/>

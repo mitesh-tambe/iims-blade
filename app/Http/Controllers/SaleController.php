@@ -8,6 +8,7 @@ use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class SaleController extends Controller
 {
@@ -50,7 +51,7 @@ class SaleController extends Controller
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',
             'products.*.purchase_price' => 'required|numeric|min:0',
-            'products.*.discount' => 'nullable|numeric|min:0|max:100',
+            'products.*.discount' => 'nullable|decimal:0,2',
             'products.*.net_amount' => 'required|numeric|min:0',
         ]);
 
@@ -132,7 +133,7 @@ class SaleController extends Controller
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
             'phone' => 'nullable|digits_between:1,12',
-            // 'invoice_no' => 'required|string|unique:sales,invoice_no,' . $sale->id,
+
             'sale_date' => 'nullable|date',
             'total_amount' => 'required|numeric|min:0',
             'payment_mode' => 'nullable|string|max:50',
@@ -141,7 +142,7 @@ class SaleController extends Controller
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',
             'products.*.purchase_price' => 'required|numeric|min:0',
-            'products.*.discount' => 'nullable|numeric|min:0|max:100',
+            'products.*.discount' => 'nullable|decimal:0,2',
             'products.*.net_amount' => 'required|numeric|min:0',
         ]);
 
@@ -149,7 +150,7 @@ class SaleController extends Controller
 
             $customerId = null;
 
-            // create new customer if entered
+            // Create customer if name or phone entered
             if (
                 !empty($validated['name']) ||
                 !empty($validated['phone'])
@@ -162,32 +163,36 @@ class SaleController extends Controller
 
                 $customerId = $customer->id;
             }
+
+            // Update sale
             $sale->update([
                 'customer_id' => $customerId,
-                // 'invoice_no' => $validated['invoice_no'],
-                'sale_date' => $validated['sale_date'],
                 'total_amount' => $validated['total_amount'],
-                'payment_mode' => $validated['payment_mode'],
+                'payment_mode' => $validated['payment_mode'] ?? null,
+                'sale_date' => $validated['sale_date'] ?? $sale->sale_date,
             ]);
 
+            // Delete old items
             $sale->saleItems()->delete();
 
+            // Fetch selected products
             $products = Product::whereIn(
                 'id',
                 collect($validated['products'])->pluck('product_id')
             )->get()->keyBy('id');
 
+            // Insert updated items
             foreach ($validated['products'] as $product) {
 
-                $selected = $products[$product['product_id']];
+                $selectedProduct = $products[$product['product_id']];
 
                 $sale->saleItems()->create([
-                    'product_id' => $product['product_id'],
-                    'quantity' => $product['quantity'],
+                    'product_id'    => $product['product_id'],
+                    'quantity'      => $product['quantity'],
                     'selling_price' => $product['purchase_price'],
-                    'mrp' => $selected->mrp,
-                    'discount' => $product['discount'] ?? 0,
-                    'net_amount' => $product['net_amount'],
+                    'mrp'           => $selectedProduct->mrp,
+                    'discount'      => $product['discount'] ?? 0,
+                    'net_amount'    => $product['net_amount'],
                 ]);
             }
         });

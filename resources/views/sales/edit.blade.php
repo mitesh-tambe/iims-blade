@@ -38,8 +38,7 @@
                         <label class="label">Customer Name</label>
 
                         <input type="text" name="name" class="input input-bordered w-full"
-                            value="{{ old('name', $sale->customer?->name) }}" placeholder="Enter customer name"
-                            required />
+                            value="{{ old('name', $sale->customer?->name) }}" placeholder="Enter customer name" />
 
                         @error('name')
                             <p class="text-error text-sm mt-1">{{ $message }}</p>
@@ -50,8 +49,7 @@
                         <label class="label">Contact No</label>
 
                         <input type="number" name="phone" class="input input-bordered w-full"
-                            value="{{ old('phone', $sale->customer?->phone) }}" placeholder="Enter contact no"
-                            required />
+                            value="{{ old('phone', $sale->customer?->phone) }}" placeholder="Enter contact no" />
 
                         @error('phone')
                             <p class="text-error text-sm mt-1">{{ $message }}</p>
@@ -149,7 +147,7 @@
                                 <div class="md:col-span-1">
                                     <label class="label">Disc %</label>
 
-                                    <input type="number" name="products[{{ $index }}][discount]"
+                                    <input type="number" step="0.01" name="products[{{ $index }}][discount]"
                                         class="discount-input input input-bordered w-full"
                                         value="{{ old("products.$index.discount", $item->discount) }}">
                                 </div>
@@ -447,9 +445,7 @@
             const net =
                 mrp - discountAmount;
 
-            row.querySelector('.net_amount').value =
-                net.toFixed(2);
-
+            row.querySelector('.net_amount').value = Math.round((net * 100) / 100).toFixed(2);
             calculateTotal();
 
         }
@@ -471,7 +467,7 @@
 
             document.querySelector(
                 'input[name="total_amount"]'
-            ).value = total.toFixed(2);
+            ).value = Math.round(total).toFixed(2);
 
         }
 
@@ -530,7 +526,7 @@
         <div class="md:col-span-1">
             <label class="label">Disc %</label>
 
-            <input type="number"
+            <input type="number" step="0.01"
                 name="products[${productIndex}][discount]"
                 class="input input-bordered w-full discount-input"
                 value="0"/>
