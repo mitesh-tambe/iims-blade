@@ -84,14 +84,15 @@
                                 <label class="label">Date *</label>
 
                                 <input type="date" name="sale_date" class="input input-bordered w-full"
-                                    value="{{ old('sale_date') }}" required />
+                                    value="{{ auth()->user()->email == 'admin@gmail.com' ? old('sale_date') : now()->toDateString() }}"
+                                    {{ auth()->user()->email == 'admin@gmail.com' ? '' : 'readonly' }} required />
                             </div>
 
                             <div>
                                 <label class="label">Customer Name</label>
 
                                 <input type="text" name="name" class="input input-bordered w-full"
-                                    value="{{ old('name') }}" placeholder="Enter customer name"/>
+                                    value="{{ old('name') }}" placeholder="Enter customer name" />
 
                                 @error('name')
                                     <p class="text-error text-sm mt-1">{{ $message }}</p>
@@ -102,7 +103,7 @@
                                 <label class="label">Contact No</label>
 
                                 <input type="number" name="phone" class="input input-bordered w-full"
-                                    value="{{ old('phone') }}" placeholder="Enter contact number"/>
+                                    value="{{ old('phone') }}" placeholder="Enter contact number" />
 
                                 @error('phone')
                                     <p class="text-error text-sm mt-1">{{ $message }}</p>
@@ -624,8 +625,7 @@
 
             });
 
-            document.querySelector('input[name="total_amount"]').value =
-                total.toFixed(2);
+            document.querySelector('input[name="total_amount"]').value = Math.round(total).toFixed(2);
         }
 
         window.addEventListener('storage', async function(event) {
