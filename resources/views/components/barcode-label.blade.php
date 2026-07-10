@@ -33,7 +33,7 @@
     <div class="bottom-row">
 
         <span>
-            Rack: {{ $product->rack_no ?? 'N/A' }}
+            Rack: {{ $product->rack->name ?? 'N/A' }}
         </span>
 
         <span>
