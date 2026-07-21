@@ -13,7 +13,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $sales = Sale::select('id', 'invoice_no', 'total_amount', 'sale_date')->latest()->get();
+        $sales = Sale::select('id', 'invoice_no', 'total_amount', 'sale_date')->latest()->take(10)->get();
         // dd($sales);
         return view('dashboard', [
             'productsCount'     => Product::count(),

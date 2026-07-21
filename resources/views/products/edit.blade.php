@@ -69,7 +69,7 @@
                     {{-- Disc % Company --}}
                     <div>
                         <label class="label">Disc % (Company)</label>
-                        <input type="number" name="disc_from_company" class="input input-bordered w-full"
+                        <input type="number" step="0.01" name="disc_from_company" class="input input-bordered w-full"
                             value="{{ old('disc_from_company', $product->disc_from_company) }}" placeholder="%" />
                     </div>
 
@@ -83,7 +83,7 @@
                     {{-- Disc % Customer --}}
                     <div>
                         <label class="label">Disc % (Customer)</label>
-                        <input type="number" name="disc_for_customer" class="input input-bordered w-full"
+                        <input type="number" step="0.01" name="disc_for_customer" class="input input-bordered w-full"
                             value="{{ old('disc_for_customer', $product->disc_for_customer) }}" placeholder="%" />
                     </div>
 

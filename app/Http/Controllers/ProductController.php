@@ -125,8 +125,8 @@ class ProductController extends Controller
                 'language_id'       => 'required|exists:languages,id',
                 'category_id'       => 'required|exists:categories,id',
                 'mrp'               => 'required|numeric|min:0',
-                'disc_from_company' => 'nullable|numeric|min:0|max:100',
-                'disc_for_customer' => 'nullable|numeric|min:0|max:100|lte:disc_from_company',
+                'disc_from_company' => 'nullable|decimal:0,2',
+                'disc_for_customer' => 'nullable|decimal:0,2|lte:disc_from_company',
                 'rack_id'          => 'required|exists:racks,id',
             ],
             [
@@ -228,29 +228,6 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        // $validated = $request->validate([
-        //     'book_name'            => ['required', 'string', 'max:255'],
-        //     'isbn'                 => ['nullable', 'string', 'max:100'],
-        //     'edition'              => ['nullable', 'integer', 'min:1'],
-        //     'book_pages'           => ['required', 'string', 'max:10'],
-        //     'barcode_no' => [
-        //         'nullable',
-        //         'string',
-        //         'max:100',
-        //         Rule::unique('products', 'barcode_no')->ignore($product->id),
-        //     ],
-        //     'mrp'                  => ['required', 'numeric', 'min:0'],
-        //     'disc_from_company'    => ['nullable', 'numeric', 'min:0', 'max:100'],
-        //     'amt_company'          => ['nullable', 'numeric', 'min:0'],
-        //     'disc_for_customer'    => ['nullable', 'numeric', 'min:0', 'max:100'],
-        //     'amt_customer'         => ['nullable', 'numeric', 'min:0'],
-        //     'author_id'            => ['required', 'exists:authors,id'],
-        //     'publication_id'       => ['required', 'exists:publications,id'],
-        //     'language_id'          => ['required', 'exists:languages,id'],
-        //     'category_id'          => ['required', 'exists:categories,id'],
-        //     'rack_id'              => ['required', 'exists:racks,id'],
-        // ]);
-
         $validator = Validator::make($request->all(), [
             'book_name'            => ['required', 'string', 'max:255'],
             'isbn'                 => ['nullable', 'string', 'max:100'],
@@ -265,9 +242,9 @@ class ProductController extends Controller
             ],
 
             'mrp'                  => ['required', 'numeric', 'min:0'],
-            'disc_from_company'    => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'disc_from_company'    => ['nullable', 'decimal:0,2'],
             'amt_company'          => ['nullable', 'numeric', 'min:0'],
-            'disc_for_customer'    => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'disc_for_customer'    => ['nullable', 'decimal:0,2', 'lte:disc_from_company'],
             'amt_customer'         => ['nullable', 'numeric', 'min:0'],
             'author_id'            => ['required', 'exists:authors,id'],
             'publication_id'       => ['required', 'exists:publications,id'],
@@ -355,50 +332,6 @@ class ProductController extends Controller
             ->with('success', 'Product deleted successfully.');
     }
 
-
-    // public function export(Request $request)
-    // {
-    //     $fileName = 'products_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
-
-    //     return response()->streamDownload(function () use ($request) {
-
-    //         $writer = SimpleExcelWriter::streamDownload('products.xlsx');
-
-    //         Product::with(['author', 'publication', 'language', 'category'])
-    //             ->filter($request->all())
-    //             ->orderBy('id')
-    //             ->chunk(500, function ($products) use ($writer) {
-
-    //                 foreach ($products as $product) {
-    //                     $writer->addRow([
-    //                         'ID' => $product->id,
-    //                         'Book Name' => $product->book_name,
-    //                         'ISBN' => $product->isbn,
-    //                         'Edition' => $product->edition,
-    //                         'Pages' => $product->book_pages,
-    //                         'Barcode' => $product->barcode_no,
-
-    //                         'Author' => $product->author?->name,
-    //                         'Publication' => $product->publication?->name,
-    //                         'Language' => $product->language?->name,
-    //                         'Category' => $product->category?->name,
-
-    //                         'MRP' => $product->mrp,
-    //                         'Company Discount' => $product->disc_from_company,
-    //                         'Customer Discount' => $product->disc_for_customer,
-    //                         'Company Amount' => $product->amt_company,
-    //                         'Customer Amount' => $product->amt_customer,
-
-    //                         'Rack No' => $product->rack?->name,
-    //                         'Created At' => $product->created_at?->format('Y-m-d'),
-    //                     ]);
-    //                 }
-    //             });
-
-    //         $writer->close();
-    //     }, $fileName);
-    // }
-
     public function export(Request $request)
     {
         $writer = SimpleExcelWriter::streamDownload(
@@ -469,7 +402,8 @@ class ProductController extends Controller
                 'barcode_no',
                 'mrp',
                 'author_id',
-                'publication_id'
+                'publication_id',
+                'disc_from_company'
             )
             ->limit(20)
             ->get();

@@ -289,6 +289,13 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <div class="mt-4 flex justify-end">
+                        <a href="{{ route('sales.index') }}"
+                            class="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+                            View All Transactions →
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -393,6 +400,13 @@
 
                     const selected = this.options[value];
 
+                    // Save maximum allowed discount on this row
+                    row.dataset.maxDiscount = parseFloat(selected.disc_from_company || 0);
+
+                    // Set input max attribute
+                    const discountInput = row.querySelector('.discount-input');
+                    discountInput.max = row.dataset.maxDiscount;
+
                     const qtyInput = row.querySelector('.quantity-input');
 
                     const priceInput = row.querySelector('.purchase-price');
@@ -453,6 +467,19 @@
             row.querySelector('.discount-input')
                 ?.addEventListener('input', function() {
 
+                    const maxDiscount = parseFloat(row.dataset.maxDiscount || 0);
+                    let value = parseFloat(this.value || 0);
+
+                    if (value > maxDiscount) {
+                        alert(`Maximum allowed discount is ${maxDiscount}%`);
+                        value = maxDiscount;
+                        this.value = maxDiscount;
+                    }
+
+                    if (value < 0) {
+                        this.value = 0;
+                    }
+
                     calculateRowAmount(row);
 
                 });
@@ -467,24 +494,31 @@
 
         function calculateRowAmount(row) {
 
-            const mrp =
-                parseFloat(
-                    row.querySelector('.purchase-price')?.value || 0
-                );
+            const mrp = parseFloat(
+                row.querySelector('.purchase-price')?.value || 0
+            );
 
-            const discount =
-                parseFloat(
-                    row.querySelector('.discount-input')?.value || 0
-                );
+            const discountInput = row.querySelector('.discount-input');
 
-            const netAmountInput =
-                row.querySelector('.net_amount');
+            let discount = parseFloat(discountInput.value || 0);
 
-            const discountAmount =
-                (mrp * discount) / 100;
+            const maxDiscount = parseFloat(row.dataset.maxDiscount || 0);
 
-            const netAmount =
-                mrp - discountAmount;
+            if (discount > maxDiscount) {
+                discount = maxDiscount;
+                discountInput.value = maxDiscount;
+            }
+
+            if (discount < 0) {
+                discount = 0;
+                discountInput.value = 0;
+            }
+
+            const netAmountInput = row.querySelector('.net_amount');
+
+            const discountAmount = (mrp * discount) / 100;
+
+            const netAmount = mrp - discountAmount;
 
             netAmountInput.value = Math.round(netAmount).toFixed(2);
 
@@ -648,6 +682,15 @@
                     const response = await fetch(`/products/${productId}/json`);
 
                     const product = await response.json();
+
+                    row.dataset.maxDiscount = parseFloat(product.disc_from_company || 0);
+
+                    const discountInput = row.querySelector('.discount-input');
+                    discountInput.max = row.dataset.maxDiscount;
+
+                    if (parseFloat(discountInput.value || 0) > row.dataset.maxDiscount) {
+                        discountInput.value = row.dataset.maxDiscount;
+                    }
 
                     const tomSelect =
                         row.querySelector('.product-select').tomselect;
