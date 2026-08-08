@@ -78,37 +78,6 @@ class ProductController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    // public function store(Request $request)
-    // {
-    //     $mrp = (float) $request->mrp;
-    //     $amtCompany = round(($mrp * (float) $request->disc_from_company) / 100);
-    //     $amtCustomer = round(($mrp * (float) $request->disc_for_customer) / 100);
-
-    //     Product::create([
-    //         'book_name'           => $request->book_name,
-    //         'isbn'                => $request->isbn,
-    //         'edition'             => $request->edition,
-    //         'book_pages'          => $request->book_pages,
-    //         'barcode_no'          => $request->barcode_no,
-    //         'author_id'           => $request->author_id,
-    //         'publication_id'      => $request->publication_id,
-    //         'language_id'         => $request->language_id,
-    //         'category_id'         => $request->category_id,
-    //         'mrp'                 => $request->mrp,
-    //         'disc_from_company'   => $request->disc_from_company,
-    //         'amt_company'         => $amtCompany,
-    //         'disc_for_customer'   => $request->disc_for_customer,
-    //         'amt_customer'        => $amtCustomer,
-    //     ]);
-
-    //     return redirect()
-    //         ->route('products.index')
-    //         ->with('success', 'Product created successfully.');
-    // }
-
     public function store(Request $request)
     {
         $validator = Validator::make(

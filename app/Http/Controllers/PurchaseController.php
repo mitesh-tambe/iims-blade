@@ -40,7 +40,19 @@ class PurchaseController extends Controller
 
     public function index()
     {
-        $purchases = Purchase::with('vendor')->get();
+        $purchases = Purchase::with('vendor')
+            ->where(function ($query) {
+                $search = request('search');
+
+                $query->where('invoice_no', 'like', '%' . $search . '%')
+                    ->orWhereHas('vendor', function ($vendorQuery) use ($search) {
+                        $vendorQuery->where('name', 'like', '%' . $search . '%');
+                    });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
         return view('invoices.index', compact('purchases'));
     }
 

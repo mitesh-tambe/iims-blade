@@ -90,8 +90,8 @@
         </table>
 
         {{-- 📄 Pagination --}}
-        {{-- <div class="pt-4">
-            {{ $products->links() }}
-        </div> --}}
+        <div class="pt-4">
+            {{ $purchases->links() }}
+        </div>
     </div>
 </x-app-layout>

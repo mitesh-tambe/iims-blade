@@ -125,7 +125,8 @@
                     <th>Publication</th>
                     <th>MRP</th>
                     <th>Author</th>
-                    <th>Language</th>
+                    {{-- <th>Language</th> --}}
+                    <th>Barcode No.</th>
                     <th>Category</th>
                     <th>Rack No.</th>
                     <th class="text-right">Actions</th>
@@ -149,7 +150,9 @@
 
                         <td>{{ $product->author->name ?? '-' }}</td>
 
-                        <td>{{ $product->language->name ?? '-' }}</td>
+                        {{-- <td>{{ $product->language->name ?? '-' }}</td> --}}
+
+                        <td>{{ $product->barcode_no ?? '-' }}</td>
 
                         <td>{{ $product->category->name ?? '-' }}</td>
 
