@@ -261,21 +261,21 @@
                     option: function(item, escape) {
 
                         return `
-                    <div>
-    <strong>${escape(item.book_name)}</strong>
+                        <div>
+                            <strong>${escape(item.book_name)}</strong>
 
-    <div class="flex items-center gap-4 text-xs text-gray-500">
-        <span>₹ ${item.mrp ?? 0}</span>
+                            <div class="flex items-center gap-4 text-xs text-gray-500">
+                                <span>₹ ${item.mrp ?? 0}</span>
 
-        <span>
-            ${escape(item.author?.name ?? '-')}
-        </span>
+                                <span>
+                                    ${escape(item.author?.name ?? '-')}
+                                </span>
 
-        <span>
-            ${escape(item.publication?.name ?? '-')}
-        </span>
-    </div>
-</div>
+                                <span>
+                                    ${escape(item.publication?.name ?? '-')}
+                                </span>
+                            </div>
+                        </div>
                     `;
                     }
                 },
@@ -311,13 +311,21 @@
 
                     if (!selected) return;
 
-                    const qty = parseFloat(
-                        row.querySelector('.quantity-input').value || 1
-                    );
+                    const qty =
+                        parseFloat(
+                            row.querySelector('.quantity-input').value || 1
+                        );
 
                     const mrp =
                         parseFloat(selected.mrp || 0);
 
+                    // Store unit MRP separately on the row
+                    row.dataset.unitMrp = mrp;
+
+                    // Store current quantity
+                    row.dataset.lastQuantity = qty;
+
+                    // Total MRP = Unit MRP × Quantity
                     row.querySelector('.purchase-price').value =
                         (qty * mrp).toFixed(2);
 
@@ -337,19 +345,48 @@
             selectElement.tomselect = tom;
 
 
+            // =====================================================
             // EDIT PAGE EXISTING PRODUCTS
+            // =====================================================
+
             if (selectElement.options.length > 0) {
 
                 const option =
                     selectElement.options[0];
 
+                const purchasePrice =
+                    parseFloat(
+                        row.querySelector('.purchase-price')?.value || 0
+                    );
+
+                const quantity =
+                    parseFloat(
+                        row.querySelector('.quantity-input')?.value || 1
+                    );
+
+                /*
+                 * Existing purchase_price contains TOTAL MRP.
+                 *
+                 * Example:
+                 * Qty = 3
+                 * Total MRP = 300
+                 *
+                 * Unit MRP = 300 / 3 = 100
+                 */
+                const unitMrp =
+                    quantity > 0 ?
+                    purchasePrice / quantity :
+                    purchasePrice;
+
+                row.dataset.unitMrp = unitMrp;
+                row.dataset.lastQuantity = quantity;
+
                 tom.addOption({
 
                     id: option.value,
                     book_name: option.text,
-                    mrp: parseFloat(
-                        row.querySelector('.purchase-price').value || 0
-                    )
+
+                    mrp: unitMrp
 
                 });
 
@@ -361,50 +398,91 @@
             }
 
 
+            // =====================================================
+            // EDIT PRODUCT BUTTON
+            // =====================================================
+
             const editBtn =
                 row.querySelector('.edit-product-btn');
 
-            editBtn.addEventListener('click', function() {
+            if (editBtn) {
 
-                const productId =
-                    row.dataset.productId;
+                editBtn.addEventListener('click', function() {
 
-                if (!productId) {
+                    const productId =
+                        row.dataset.productId;
 
-                    alert('Please select product first');
-                    return;
+                    if (!productId) {
 
-                }
+                        alert('Please select product first');
+                        return;
 
-                window.open(
-                    `/products/${productId}/edit?generate_barcode=1`,
-                    '_blank'
-                );
+                    }
 
-            });
+                    window.open(
+                        `/products/${productId}/edit?generate_barcode=1`,
+                        '_blank'
+                    );
 
+                });
+
+            }
+
+
+            // =====================================================
+            // QUANTITY CHANGE
+            // =====================================================
 
             row.querySelector('.quantity-input')
                 .addEventListener('input', function() {
 
-                    const product =
-                        tom.options[tom.getValue()];
-
-                    if (!product) return;
-
                     const qty =
                         parseFloat(this.value || 1);
 
-                    const mrp =
-                        parseFloat(product.mrp || 0);
+                    let unitMrp =
+                        parseFloat(row.dataset.unitMrp || 0);
 
+                    /*
+                     * If unit MRP is missing, calculate it from
+                     * the current total MRP and previous quantity.
+                     */
+                    if (!unitMrp || unitMrp <= 0) {
+
+                        const currentTotalMrp =
+                            parseFloat(
+                                row.querySelector('.purchase-price')?.value || 0
+                            );
+
+                        const previousQty =
+                            parseFloat(
+                                row.dataset.lastQuantity || 1
+                            );
+
+                        unitMrp =
+                            previousQty > 0 ?
+                            currentTotalMrp / previousQty :
+                            currentTotalMrp;
+
+                        row.dataset.unitMrp = unitMrp;
+                    }
+
+                    // Remember latest quantity
+                    row.dataset.lastQuantity = qty;
+
+                    /*
+                     * MRP field = Unit MRP × Quantity
+                     */
                     row.querySelector('.purchase-price').value =
-                        (qty * mrp).toFixed(2);
+                        (qty * unitMrp).toFixed(2);
 
                     calculateRowAmount(row);
 
                 });
 
+
+            // =====================================================
+            // DISCOUNT CHANGE
+            // =====================================================
 
             row.querySelector('.discount-input')
                 ?.addEventListener('input', function() {
@@ -414,18 +492,51 @@
                 });
 
 
+            // =====================================================
+            // PURCHASE PRICE / MRP CHANGE
+            // =====================================================
+
             row.querySelector('.purchase-price')
                 .addEventListener('input', function() {
+
+                    const qty =
+                        parseFloat(
+                            row.querySelector('.quantity-input')?.value || 1
+                        );
+
+                    const totalMrp =
+                        parseFloat(this.value || 0);
+
+                    /*
+                     * MRP field contains total MRP for the row.
+                     *
+                     * Example:
+                     * Qty = 2
+                     * MRP = 200
+                     *
+                     * Unit MRP = 100
+                     */
+                    row.dataset.unitMrp =
+                        qty > 0 ?
+                        totalMrp / qty :
+                        totalMrp;
+
+                    row.dataset.lastQuantity = qty;
 
                     calculateRowAmount(row);
 
                 });
 
 
+            // Initial calculation
             calculateRowAmount(row);
 
         }
 
+
+        // =========================================================
+        // CALCULATE ROW AMOUNT
+        // =========================================================
 
         function calculateRowAmount(row) {
 
@@ -445,11 +556,17 @@
             const net =
                 mrp - discountAmount;
 
-            row.querySelector('.net_amount').value = Math.round((net * 100) / 100).toFixed(2);
+            row.querySelector('.net_amount').value =
+                Math.round((net * 100) / 100).toFixed(2);
+
             calculateTotal();
 
         }
 
+
+        // =========================================================
+        // CALCULATE TOTAL
+        // =========================================================
 
         function calculateTotal() {
 
@@ -472,6 +589,10 @@
         }
 
 
+        // =========================================================
+        // DOM READY
+        // =========================================================
+
         document.addEventListener(
             'DOMContentLoaded',
             function() {
@@ -490,6 +611,10 @@
         );
 
 
+        // =========================================================
+        // ADD PRODUCT ROW
+        // =========================================================
+
         function addProductRow() {
 
             const container =
@@ -503,68 +628,78 @@
 
             row.innerHTML = `
 
-        <div class="md:col-span-5">
-            <label class="label">Product</label>
+            <div class="md:col-span-5">
+                <label class="label">Product</label>
 
-            <select name="products[${productIndex}][product_id]"
-                class="product-select w-full"
-                required>
-            </select>
-        </div>
+                <select
+                    name="products[${productIndex}][product_id]"
+                    class="product-select w-full"
+                    required>
+                </select>
+            </div>
 
-        <div class="md:col-span-1">
-            <label class="label">Qty</label>
+            <div class="md:col-span-1">
+                <label class="label">Qty</label>
 
-            <input type="number"
-                name="products[${productIndex}][quantity]"
-                class="input input-bordered w-full quantity-input"
-                min="1"
-                value="1"
-                required />
-        </div>
+                <input
+                    type="number"
+                    name="products[${productIndex}][quantity]"
+                    class="input input-bordered w-full quantity-input"
+                    min="1"
+                    value="1"
+                    required />
+            </div>
 
-        <div class="md:col-span-1">
-            <label class="label">Disc %</label>
+            <div class="md:col-span-1">
+                <label class="label">Disc %</label>
 
-            <input type="number" step="0.01"
-                name="products[${productIndex}][discount]"
-                class="input input-bordered w-full discount-input"
-                value="0"/>
-        </div>
+                <input
+                    type="number"
+                    step="0.01"
+                    name="products[${productIndex}][discount]"
+                    class="input input-bordered w-full discount-input"
+                    value="0"/>
+            </div>
 
-        <div class="md:col-span-2">
-            <label class="label">MRP</label>
+            <div class="md:col-span-2">
+                <label class="label">MRP</label>
 
-            <input type="number"
-                step="0.01"
-                name="products[${productIndex}][purchase_price]"
-                class="input input-bordered w-full purchase-price"
-                required />
-        </div>
+                <input
+                    type="number"
+                    step="0.01"
+                    name="products[${productIndex}][purchase_price]"
+                    class="input input-bordered w-full purchase-price"
+                    required />
+            </div>
 
-        <div class="md:col-span-2">
-            <label class="label">Amt</label>
+            <div class="md:col-span-2">
+                <label class="label">Amt</label>
 
-            <input type="number"
-                name="products[${productIndex}][net_amount]"
-                class="input input-bordered w-full net_amount"
-                readonly />
-        </div>
+                <input
+                    type="number"
+                    step="0.01"
+                    name="products[${productIndex}][net_amount]"
+                    class="input input-bordered w-full net_amount"
+                    readonly />
+            </div>
 
-        <div class="md:col-span-1">
-            <button type="button"
-                class="btn btn-warning w-full edit-product-btn">
-                <i class="fa-solid fa-pen"></i>
-            </button>
-        </div>
+            <div class="md:col-span-1">
+                <button
+                    type="button"
+                    class="btn btn-warning w-full edit-product-btn">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+            </div>
 
-        <div class="md:col-span-1">
-            <button type="button"
-                class="btn btn-error w-full"
-                onclick="removeProductRow(this)">
-                <i class="fa-solid fa-trash"></i>
-            </button>
-        </div>
+            <div class="md:col-span-1">
+                <button
+                    type="button"
+                    class="btn btn-error w-full"
+                    onclick="removeProductRow(this)">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+
         `;
 
             container.appendChild(row);
@@ -578,13 +713,21 @@
         }
 
 
+        // =========================================================
+        // REMOVE PRODUCT ROW
+        // =========================================================
+
         function removeProductRow(button) {
 
             if (
                 document.querySelectorAll('.product-row').length === 1
-            ) return;
+            ) {
+                return;
+            }
 
-            button.closest('.product-row').remove();
+            button
+                .closest('.product-row')
+                .remove();
 
             calculateTotal();
 
