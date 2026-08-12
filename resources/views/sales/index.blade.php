@@ -1,4 +1,8 @@
 <x-app-layout>
+    @php
+        $filterParams = request()->only(['search', 'page']);
+    @endphp
+
     <div class="overflow-x-auto space-y-4">
 
         {{-- 🔝 Top Bar --}}
@@ -54,7 +58,12 @@
 
                             @if (auth()->user()->email === 'admin@gmail.com')
                                 {{-- ✏️ Edit --}}
-                                <a href="{{ route('sales.edit', $sale) }}" class="btn btn-xs btn-warning">
+                                {{-- <a href="{{ route('sales.edit', $sale) }}" class="btn btn-xs btn-warning">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </a> --}}
+
+                                <a href="{{ route('sales.edit', array_merge(['sale' => $sale->id], $filterParams)) }}"
+                                    class="btn btn-xs btn-warning">
                                     <i class="fa-solid fa-pencil"></i>
                                 </a>
 

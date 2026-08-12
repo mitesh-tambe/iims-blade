@@ -11,6 +11,9 @@
                 @csrf
                 @method('PUT')
 
+                <input type="hidden" name="page" value="{{ request('page') }}">
+                <input type="hidden" name="search" value="{{ request('search') }}">
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                     {{-- Invoice No --}}

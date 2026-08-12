@@ -197,8 +197,21 @@ class SaleController extends Controller
             }
         });
 
+        $filters = [];
+
+        $map = [
+            'search' => 'search',
+            'page'   => 'page',
+        ];
+
+        foreach ($map as $from => $to) {
+            if ($request->filled($from)) {
+                $filters[$to] = $request->input($from);
+            }
+        }
+
         return redirect()
-            ->route('sales.index')
+            ->route('sales.index', $filters)
             ->with('success', 'Bill updated successfully')
             ->with('print_bill', route('bill.test', $sale->id));
     }
