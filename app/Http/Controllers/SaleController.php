@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
+use App\Models\StockMovements;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -35,14 +36,80 @@ class SaleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // public function store(Request $request)
+    // {
+    //     // dd($request->all());
+    //     $validated = $request->validate([
+    //         'name' => 'nullable|string|max:255',
+    //         'phone' => 'nullable|digits_between:1,12',
+
+    //         // 'invoice_no' => 'required|string|unique:sales,invoice_no',
+    //         'sale_date' => 'nullable|date',
+    //         'total_amount' => 'required|numeric|min:0',
+    //         'payment_mode' => 'nullable|string|max:50',
+
+    //         'products' => 'required|array|min:1',
+    //         'products.*.product_id' => 'required|exists:products,id',
+    //         'products.*.quantity' => 'required|integer|min:1',
+    //         'products.*.purchase_price' => 'required|numeric|min:0',
+    //         'products.*.discount' => 'nullable|decimal:0,2',
+    //         'products.*.net_amount' => 'required|numeric|min:0',
+    //     ]);
+
+    //     $sale = DB::transaction(function () use ($validated) {
+
+    //         $customerId = null;
+
+    //         // create customer if name or phone entered
+    //         if (
+    //             !empty($validated['name']) ||
+    //             !empty($validated['phone'])
+    //         ) {
+
+    //             $customer = Customer::create([
+    //                 'name' => $validated['name'] ?? '',
+    //                 'phone' => $validated['phone'] ?? '',
+    //             ]);
+
+    //             $customerId = $customer->id;
+    //         }
+    //         $sale = Sale::create([
+    //             'customer_id' => $customerId,
+    //             // 'invoice_no' => $validated['invoice_no'],
+    //             'total_amount' => $validated['total_amount'],
+    //             'payment_mode' => $validated['payment_mode'],
+    //             'sale_date' => $validated['sale_date'] ?? now(),
+    //             'created_by' => Auth::id(),
+    //         ]);
+
+    //         $products = Product::whereIn('id', collect($validated['products'])
+    //             ->pluck('product_id'))
+    //             ->get()
+    //             ->keyBy('id');
+
+    //         foreach ($validated['products'] as $product) {
+    //             $selectedProduct = $products[$product['product_id']];
+    //             $sale->saleItems()->create([
+    //                 'product_id' => $product['product_id'],
+    //                 'quantity' => $product['quantity'],
+    //                 'selling_price' => $product['purchase_price'],
+    //                 'mrp' => $selectedProduct->mrp,
+    //                 'discount' => $product['discount'] ?? 0,
+    //                 'net_amount' => $product['net_amount'],
+    //             ]);
+    //         }
+
+    //         return $sale;
+    //     });
+
+    //     return redirect()->route('bill.test', $sale->id);
+    // }
+
     public function store(Request $request)
     {
-        // dd($request->all());
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
             'phone' => 'nullable|digits_between:1,12',
-
-            // 'invoice_no' => 'required|string|unique:sales,invoice_no',
             'sale_date' => 'nullable|date',
             'total_amount' => 'required|numeric|min:0',
             'payment_mode' => 'nullable|string|max:50',
@@ -59,12 +126,11 @@ class SaleController extends Controller
 
             $customerId = null;
 
-            // create customer if name or phone entered
+            // Create customer if name or phone entered
             if (
                 !empty($validated['name']) ||
                 !empty($validated['phone'])
             ) {
-
                 $customer = Customer::create([
                     'name' => $validated['name'] ?? '',
                     'phone' => $validated['phone'] ?? '',
@@ -72,22 +138,27 @@ class SaleController extends Controller
 
                 $customerId = $customer->id;
             }
+
+            // Create Sale
             $sale = Sale::create([
                 'customer_id' => $customerId,
-                // 'invoice_no' => $validated['invoice_no'],
                 'total_amount' => $validated['total_amount'],
                 'payment_mode' => $validated['payment_mode'],
                 'sale_date' => $validated['sale_date'] ?? now(),
                 'created_by' => Auth::id(),
             ]);
 
-            $products = Product::whereIn('id', collect($validated['products'])
-                ->pluck('product_id'))
-                ->get()
-                ->keyBy('id');
+            // Fetch products
+            $products = Product::whereIn(
+                'id',
+                collect($validated['products'])->pluck('product_id')
+            )->get()->keyBy('id');
 
             foreach ($validated['products'] as $product) {
+
                 $selectedProduct = $products[$product['product_id']];
+
+                // Create Sale Item
                 $sale->saleItems()->create([
                     'product_id' => $product['product_id'],
                     'quantity' => $product['quantity'],
@@ -95,6 +166,18 @@ class SaleController extends Controller
                     'mrp' => $selectedProduct->mrp,
                     'discount' => $product['discount'] ?? 0,
                     'net_amount' => $product['net_amount'],
+                ]);
+
+                // Create Stock Movement
+                // Sale reduces stock, therefore quantity is NEGATIVE.
+                StockMovements::create([
+                    'product_id' => $product['product_id'],
+                    'type' => 'sale',
+                    'quantity' => - ((int) $product['quantity']),
+                    'reference_type' => Sale::class,
+                    'reference_id' => $sale->id,
+                    'remarks' => 'Sale',
+                    'created_by' => Auth::id(),
                 ]);
             }
 
@@ -128,6 +211,94 @@ class SaleController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    // public function update(Request $request, Sale $sale)
+    // {
+    //     $validated = $request->validate([
+    //         'name' => 'nullable|string|max:255',
+    //         'phone' => 'nullable|digits_between:1,12',
+
+    //         'sale_date' => 'nullable|date',
+    //         'total_amount' => 'required|numeric|min:0',
+    //         'payment_mode' => 'nullable|string|max:50',
+
+    //         'products' => 'required|array|min:1',
+    //         'products.*.product_id' => 'required|exists:products,id',
+    //         'products.*.quantity' => 'required|integer|min:1',
+    //         'products.*.purchase_price' => 'required|numeric|min:0',
+    //         'products.*.discount' => 'nullable|decimal:0,2',
+    //         'products.*.net_amount' => 'required|numeric|min:0',
+    //     ]);
+
+    //     DB::transaction(function () use ($validated, $sale) {
+
+    //         $customerId = null;
+
+    //         // Create customer if name or phone entered
+    //         if (
+    //             !empty($validated['name']) ||
+    //             !empty($validated['phone'])
+    //         ) {
+
+    //             $customer = Customer::create([
+    //                 'name' => $validated['name'] ?? '',
+    //                 'phone' => $validated['phone'] ?? '',
+    //             ]);
+
+    //             $customerId = $customer->id;
+    //         }
+
+    //         // Update sale
+    //         $sale->update([
+    //             'customer_id' => $customerId,
+    //             'total_amount' => $validated['total_amount'],
+    //             'payment_mode' => $validated['payment_mode'] ?? null,
+    //             'sale_date' => $validated['sale_date'] ?? $sale->sale_date,
+    //         ]);
+
+    //         // Delete old items
+    //         $sale->saleItems()->delete();
+
+    //         // Fetch selected products
+    //         $products = Product::whereIn(
+    //             'id',
+    //             collect($validated['products'])->pluck('product_id')
+    //         )->get()->keyBy('id');
+
+    //         // Insert updated items
+    //         foreach ($validated['products'] as $product) {
+
+    //             $selectedProduct = $products[$product['product_id']];
+
+    //             $sale->saleItems()->create([
+    //                 'product_id'    => $product['product_id'],
+    //                 'quantity'      => $product['quantity'],
+    //                 'selling_price' => $product['purchase_price'],
+    //                 'mrp'           => $selectedProduct->mrp,
+    //                 'discount'      => $product['discount'] ?? 0,
+    //                 'net_amount'    => $product['net_amount'],
+    //             ]);
+    //         }
+    //     });
+
+    //     $filters = [];
+
+    //     $map = [
+    //         'search' => 'search',
+    //         'page'   => 'page',
+    //     ];
+
+    //     foreach ($map as $from => $to) {
+    //         if ($request->filled($from)) {
+    //             $filters[$to] = $request->input($from);
+    //         }
+    //     }
+
+    //     return redirect()
+    //         ->route('sales.index', $filters)
+    //         ->with('success', 'Bill updated successfully')
+    //         ->with('print_bill', route('bill.test', $sale->id));
+    // }
+
     public function update(Request $request, Sale $sale)
     {
         $validated = $request->validate([
@@ -155,7 +326,6 @@ class SaleController extends Controller
                 !empty($validated['name']) ||
                 !empty($validated['phone'])
             ) {
-
                 $customer = Customer::create([
                     'name' => $validated['name'] ?? '',
                     'phone' => $validated['phone'] ?? '',
@@ -164,7 +334,7 @@ class SaleController extends Controller
                 $customerId = $customer->id;
             }
 
-            // Update sale
+            // Update Sale
             $sale->update([
                 'customer_id' => $customerId,
                 'total_amount' => $validated['total_amount'],
@@ -172,27 +342,65 @@ class SaleController extends Controller
                 'sale_date' => $validated['sale_date'] ?? $sale->sale_date,
             ]);
 
-            // Delete old items
+            /*
+        |--------------------------------------------------------------------------
+        | Remove old stock movements for this sale
+        |--------------------------------------------------------------------------
+        */
+
+            StockMovements::where('reference_type', Sale::class)
+                ->where('reference_id', $sale->id)
+                ->where('type', 'sale')
+                ->delete();
+
+            /*
+        |--------------------------------------------------------------------------
+        | Remove old sale items
+        |--------------------------------------------------------------------------
+        */
+
             $sale->saleItems()->delete();
 
-            // Fetch selected products
+            /*
+        |--------------------------------------------------------------------------
+        | Fetch products
+        |--------------------------------------------------------------------------
+        */
+
             $products = Product::whereIn(
                 'id',
                 collect($validated['products'])->pluck('product_id')
             )->get()->keyBy('id');
 
-            // Insert updated items
+            /*
+        |--------------------------------------------------------------------------
+        | Create new sale items + stock movements
+        |--------------------------------------------------------------------------
+        */
+
             foreach ($validated['products'] as $product) {
 
                 $selectedProduct = $products[$product['product_id']];
 
+                // Create Sale Item
                 $sale->saleItems()->create([
-                    'product_id'    => $product['product_id'],
-                    'quantity'      => $product['quantity'],
+                    'product_id' => $product['product_id'],
+                    'quantity' => $product['quantity'],
                     'selling_price' => $product['purchase_price'],
-                    'mrp'           => $selectedProduct->mrp,
-                    'discount'      => $product['discount'] ?? 0,
-                    'net_amount'    => $product['net_amount'],
+                    'mrp' => $selectedProduct->mrp,
+                    'discount' => $product['discount'] ?? 0,
+                    'net_amount' => $product['net_amount'],
+                ]);
+
+                // Create Stock Movement
+                StockMovements::create([
+                    'product_id' => $product['product_id'],
+                    'type' => 'sale',
+                    'quantity' => - ((int) $product['quantity']),
+                    'reference_type' => Sale::class,
+                    'reference_id' => $sale->id,
+                    'remarks' => 'Sale',
+                    'created_by' => Auth::id(),
                 ]);
             }
         });
@@ -201,7 +409,7 @@ class SaleController extends Controller
 
         $map = [
             'search' => 'search',
-            'page'   => 'page',
+            'page' => 'page',
         ];
 
         foreach ($map as $from => $to) {

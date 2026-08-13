@@ -8,11 +8,26 @@ class StockMovements extends Model
 {
     protected $fillable = [
         'product_id',
-        'movement_type',
+        'type',
         'quantity',
         'reference_type',
         'reference_id',
         'remarks',
         'created_by'
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function reference()
+    {
+        return $this->morphTo();
+    }
 }

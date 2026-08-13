@@ -272,6 +272,28 @@
                 </a>
             </li>
 
+            <li>
+                <a href="{{ route('reports.index') }}"
+                    class="is-drawer-close:tooltip is-drawer-close:tooltip-right {{ request()->routeIs('reports.*') ? 'sidebar-active' : '' }}"
+                    data-tip="Reports">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="my-1.5 inline-block size-4">
+
+                        <path d="M3 3v18h18"></path>
+                        <path d="M18 17V9"></path>
+                        <path d="M13 17V5"></path>
+                        <path d="M8 17v-3"></path>
+
+                    </svg>
+
+                    <span class="is-drawer-close:hidden">
+                        Reports
+                    </span>
+                </a>
+            </li>
+
 
             {{-- =====================================================
                  USERS

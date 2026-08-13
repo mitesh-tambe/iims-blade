@@ -11,6 +11,7 @@ use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\RackController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\StockMovementsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
 use App\Models\Product;
@@ -79,6 +80,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('invoices', PurchaseController::class);
     Route::resource('users', UserController::class);
     Route::resource('sales', SaleController::class);
+
+    Route::get('/reports', [StockMovementsController::class, 'index'])
+        ->name('reports.index');
+
+    Route::get('/reports/export', [StockMovementsController::class, 'export'])
+        ->name('reports.export');
 });
 
 require __DIR__ . '/auth.php';

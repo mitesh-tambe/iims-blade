@@ -7,6 +7,7 @@ use App\Models\Purchase;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
 use App\Models\PurchaseItem;
+use App\Models\StockMovements;
 use Illuminate\Support\Facades\DB;
 
 class PurchaseController extends Controller
@@ -71,28 +72,91 @@ class PurchaseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // public function store(Request $request)
+    // {
+    //     $validated = $request->validate([
+
+    //         'invoice_no' => 'required|string|max:255',
+
+    //         'purchase_date' => 'required|date',
+
+    //         'vendor_id' => 'nullable|exists:vendors,id',
+
+    //         'total_amount' => 'required|numeric|min:0',
+
+    //         'ref_no' => 'required|string|max:255|unique:purchases,ref_no',
+
+    //         'products' => 'required|array|min:1',
+
+    //         'products.*.product_id' => 'required|exists:products,id',
+
+    //         'products.*.quantity' => 'required|integer|min:1',
+
+    //         'products.*.purchase_price' => 'required|numeric|min:0',
+
+    //     ]);
+
+    //     DB::beginTransaction();
+
+    //     try {
+
+    //         // Create Purchase
+    //         $purchase = Purchase::create([
+
+    //             'vendor_id' => $validated['vendor_id'] ?? null,
+
+    //             'invoice_no' => $validated['invoice_no'],
+
+    //             'purchase_date' => $validated['purchase_date'] ?? now(),
+
+    //             'total_amount' => $validated['total_amount'],
+
+    //             'ref_no' => $validated['ref_no'],
+    //         ]);
+
+    //         // Purchase Items
+    //         foreach ($validated['products'] as $item) {
+
+    //             PurchaseItem::create([
+
+    //                 'purchase_id' => $purchase->id,
+
+    //                 'product_id' => $item['product_id'],
+
+    //                 'quantity' => (int) $item['quantity'],
+
+    //                 'cost_price' => (float) $item['purchase_price'],
+    //             ]);
+    //         }
+
+    //         DB::commit();
+
+    //         return redirect()
+    //             ->route('invoices.index')
+    //             ->with('success', 'Invoice created successfully.');
+    //     } catch (\Exception $e) {
+
+    //         DB::rollBack();
+
+    //         return back()
+    //             ->withInput()
+    //             ->with('error', $e->getMessage());
+    //     }
+    // }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
-
             'invoice_no' => 'required|string|max:255',
-
             'purchase_date' => 'required|date',
-
             'vendor_id' => 'nullable|exists:vendors,id',
-
             'total_amount' => 'required|numeric|min:0',
-
             'ref_no' => 'required|string|max:255|unique:purchases,ref_no',
 
             'products' => 'required|array|min:1',
-
             'products.*.product_id' => 'required|exists:products,id',
-
             'products.*.quantity' => 'required|integer|min:1',
-
             'products.*.purchase_price' => 'required|numeric|min:0',
-
         ]);
 
         DB::beginTransaction();
@@ -101,30 +165,33 @@ class PurchaseController extends Controller
 
             // Create Purchase
             $purchase = Purchase::create([
-
                 'vendor_id' => $validated['vendor_id'] ?? null,
-
                 'invoice_no' => $validated['invoice_no'],
-
-                'purchase_date' => $validated['purchase_date'] ?? now(),
-
+                'purchase_date' => $validated['purchase_date'],
                 'total_amount' => $validated['total_amount'],
-
                 'ref_no' => $validated['ref_no'],
             ]);
 
-            // Purchase Items
+            // Create Purchase Items + Stock Movements
             foreach ($validated['products'] as $item) {
 
+                // Create Purchase Item
                 PurchaseItem::create([
-
                     'purchase_id' => $purchase->id,
-
                     'product_id' => $item['product_id'],
-
                     'quantity' => (int) $item['quantity'],
-
                     'cost_price' => (float) $item['purchase_price'],
+                ]);
+
+                // Create Stock Movement
+                StockMovements::create([
+                    'product_id' => $item['product_id'],
+                    'movement_type' => 'purchase',
+                    'quantity' => (int) $item['quantity'],
+                    'reference_type' => Purchase::class,
+                    'reference_id' => $purchase->id,
+                    'remarks' => 'Purchase Invoice: ' . $purchase->invoice_no,
+                    'created_by' => auth()->id(),
                 ]);
             }
 
@@ -171,28 +238,99 @@ class PurchaseController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    // public function update(Request $request, $id)
+    // {
+    //     $validated = $request->validate([
+
+    //         'invoice_no' => 'required|string|max:255',
+
+    //         'purchase_date' => 'required|date',
+
+    //         'vendor_id' => 'nullable|exists:vendors,id',
+
+    //         'total_amount' => 'required|numeric|min:0',
+
+    //         'ref_no' => 'required|string|max:255|unique:purchases,ref_no,' . $id,
+
+    //         'products' => 'required|array|min:1',
+
+    //         'products.*.product_id' => 'required|exists:products,id',
+
+    //         'products.*.quantity' => 'required|integer|min:1',
+
+    //         'products.*.purchase_price' => 'required|numeric|min:0',
+
+    //     ]);
+
+    //     DB::beginTransaction();
+
+    //     try {
+
+    //         $purchase = Purchase::findOrFail($id);
+
+    //         // Update Purchase
+    //         $purchase->update([
+
+    //             'vendor_id' => $validated['vendor_id'] ?? null,
+
+    //             'invoice_no' => $validated['invoice_no'],
+
+    //             'purchase_date' => $validated['purchase_date'] ?? now(),
+
+    //             'total_amount' => $validated['total_amount'],
+
+    //             'ref_no' => $validated['ref_no'],
+
+    //         ]);
+
+    //         // Remove Old Items
+    //         $purchase->items()->delete();
+
+    //         // Recreate Items
+    //         foreach ($validated['products'] as $item) {
+
+    //             PurchaseItem::create([
+
+    //                 'purchase_id' => $purchase->id,
+
+    //                 'product_id' => $item['product_id'],
+
+    //                 'quantity' => (int) $item['quantity'],
+
+    //                 'cost_price' => (float) $item['purchase_price'],
+
+    //             ]);
+    //         }
+
+    //         DB::commit();
+
+    //         return redirect()
+    //             ->route('invoices.index')
+    //             ->with('success', 'Invoice updated successfully.');
+    //     } catch (\Exception $e) {
+
+    //         DB::rollBack();
+
+    //         return back()
+    //             ->withInput()
+    //             ->with('error', $e->getMessage());
+    //     }
+    // }
+
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-
             'invoice_no' => 'required|string|max:255',
-
             'purchase_date' => 'required|date',
-
             'vendor_id' => 'nullable|exists:vendors,id',
-
             'total_amount' => 'required|numeric|min:0',
 
             'ref_no' => 'required|string|max:255|unique:purchases,ref_no,' . $id,
 
             'products' => 'required|array|min:1',
-
             'products.*.product_id' => 'required|exists:products,id',
-
             'products.*.quantity' => 'required|integer|min:1',
-
             'products.*.purchase_price' => 'required|numeric|min:0',
-
         ]);
 
         DB::beginTransaction();
@@ -203,35 +341,57 @@ class PurchaseController extends Controller
 
             // Update Purchase
             $purchase->update([
-
                 'vendor_id' => $validated['vendor_id'] ?? null,
-
                 'invoice_no' => $validated['invoice_no'],
-
-                'purchase_date' => $validated['purchase_date'] ?? now(),
-
+                'purchase_date' => $validated['purchase_date'],
                 'total_amount' => $validated['total_amount'],
-
                 'ref_no' => $validated['ref_no'],
-
             ]);
 
-            // Remove Old Items
+            /*
+        |--------------------------------------------------------------------------
+        | Remove old stock movements for this invoice only
+        |--------------------------------------------------------------------------
+        */
+
+            StockMovements::where('reference_type', Purchase::class)
+                ->where('reference_id', $purchase->id)
+                ->where('movement_type', 'purchase')
+                ->delete();
+
+            /*
+        |--------------------------------------------------------------------------
+        | Remove old purchase items
+        |--------------------------------------------------------------------------
+        */
+
             $purchase->items()->delete();
 
-            // Recreate Items
+            /*
+        |--------------------------------------------------------------------------
+        | Create new purchase items + stock movements
+        |--------------------------------------------------------------------------
+        */
+
             foreach ($validated['products'] as $item) {
 
+                // Create Purchase Item
                 PurchaseItem::create([
-
                     'purchase_id' => $purchase->id,
-
                     'product_id' => $item['product_id'],
-
                     'quantity' => (int) $item['quantity'],
-
                     'cost_price' => (float) $item['purchase_price'],
+                ]);
 
+                // Create new Stock Movement
+                StockMovements::create([
+                    'product_id' => $item['product_id'],
+                    'movement_type' => 'purchase',
+                    'quantity' => (int) $item['quantity'],
+                    'reference_type' => Purchase::class,
+                    'reference_id' => $purchase->id,
+                    'remarks' => 'Purchase Invoice: ' . $purchase->invoice_no,
+                    'created_by' => auth()->id(),
                 ]);
             }
 
