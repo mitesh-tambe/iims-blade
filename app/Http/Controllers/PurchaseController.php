@@ -186,7 +186,7 @@ class PurchaseController extends Controller
                 // Create Stock Movement
                 StockMovements::create([
                     'product_id' => $item['product_id'],
-                    'movement_type' => 'purchase',
+                    'type' => 'purchase',
                     'quantity' => (int) $item['quantity'],
                     'reference_type' => Purchase::class,
                     'reference_id' => $purchase->id,
@@ -356,7 +356,7 @@ class PurchaseController extends Controller
 
             StockMovements::where('reference_type', Purchase::class)
                 ->where('reference_id', $purchase->id)
-                ->where('movement_type', 'purchase')
+                ->where('type', 'purchase')
                 ->delete();
 
             /*
@@ -386,7 +386,7 @@ class PurchaseController extends Controller
                 // Create new Stock Movement
                 StockMovements::create([
                     'product_id' => $item['product_id'],
-                    'movement_type' => 'purchase',
+                    'type' => 'purchase',
                     'quantity' => (int) $item['quantity'],
                     'reference_type' => Purchase::class,
                     'reference_id' => $purchase->id,
