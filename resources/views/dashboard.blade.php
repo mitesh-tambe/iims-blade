@@ -400,6 +400,30 @@
 
                     const selected = this.options[value];
 
+                    // Product exists in stock_movements but current stock is 0
+                    if (
+                        selected.available_stock !== null &&
+                        selected.available_stock !== undefined &&
+                        parseFloat(selected.available_stock) <= 0
+                    ) {
+
+                        alert('This product is currently out of stock.');
+
+                        // Remove the selected product from TomSelect
+                        this.removeItem(value);
+
+                        // Clear the row product ID
+                        delete row.dataset.productId;
+
+                        // Keep focus on product search
+                        setTimeout(() => {
+                            this.control_input.value = '';
+                            this.focus();
+                        }, 50);
+
+                        return;
+                    }
+
                     // Save maximum allowed discount on this row
                     row.dataset.maxDiscount = parseFloat(selected.disc_from_company || 0);
 

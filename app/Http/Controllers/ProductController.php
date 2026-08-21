@@ -8,6 +8,7 @@ use App\Models\Language;
 use App\Models\Product;
 use App\Models\Publication;
 use App\Models\Rack;
+use App\Models\StockMovements;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -376,6 +377,23 @@ class ProductController extends Controller
             )
             ->limit(20)
             ->get();
+
+        $products->each(function ($product) {
+
+            $stock = StockMovements::where(
+                'product_id',
+                $product->id
+            )->sum('quantity');
+
+            $hasMovements = StockMovements::where(
+                'product_id',
+                $product->id
+            )->exists();
+
+            $product->available_stock = $hasMovements
+                ? $stock
+                : null;
+        });
 
         return response()->json($products);
     }
