@@ -113,7 +113,6 @@ class SaleController extends Controller
             'sale_date' => 'nullable|date',
             'total_amount' => 'required|numeric|min:0',
             'payment_mode' => 'nullable|string|max:50',
-
             'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',
@@ -304,11 +303,9 @@ class SaleController extends Controller
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
             'phone' => 'nullable|digits_between:1,12',
-
             'sale_date' => 'nullable|date',
             'total_amount' => 'required|numeric|min:0',
             'payment_mode' => 'nullable|string|max:50',
-
             'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',

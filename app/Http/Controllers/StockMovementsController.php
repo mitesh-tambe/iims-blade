@@ -13,14 +13,13 @@ class StockMovementsController extends Controller
     private function getReportQuery(Request $request)
     {
         $validated = $request->validate([
-            'search' => 'nullable|string|max:255', 
+            'search' => 'nullable|string|max:255',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'level' => 'nullable|in:normal,critical',
         ]);
 
         $search = trim($validated['search'] ?? '');
-
         $startDate = $validated['start_date'] ?? null;
         $endDate = $validated['end_date'] ?? null;
 
@@ -39,7 +38,8 @@ class StockMovementsController extends Controller
                 DB::raw('MAX(stock_movements.created_at) as created_at')
             )
 
-            // Only products which have at least one SALE
+            // ONLY products which have at least one SALE
+            // Adjustments are still included in SUM()
             ->whereIn('stock_movements.product_id', function ($query) {
 
                 $query->select('product_id')
@@ -50,7 +50,6 @@ class StockMovementsController extends Controller
 
             // Search
             ->when($search, function ($query) use ($search) {
-
                 $query->where(
                     'products.book_name',
                     'like',
@@ -60,7 +59,6 @@ class StockMovementsController extends Controller
 
             // Start Date
             ->when($startDate, function ($query) use ($startDate) {
-
                 $query->whereDate(
                     'stock_movements.created_at',
                     '>=',
@@ -70,14 +68,12 @@ class StockMovementsController extends Controller
 
             // End Date
             ->when($endDate, function ($query) use ($endDate) {
-
                 $query->whereDate(
                     'stock_movements.created_at',
                     '<=',
                     $endDate
                 );
             })
-
             ->groupBy(
                 'stock_movements.product_id',
                 'products.book_name'
@@ -87,7 +83,6 @@ class StockMovementsController extends Controller
             ->when(
                 ($validated['level'] ?? null) === 'normal',
                 function ($query) {
-
                     $query->havingRaw(
                         'SUM(stock_movements.quantity) > 5'
                     );
@@ -98,18 +93,14 @@ class StockMovementsController extends Controller
             ->when(
                 ($validated['level'] ?? null) === 'critical',
                 function ($query) {
-
                     $query->havingRaw(
                         'SUM(stock_movements.quantity) <= 5'
                     );
                 }
             )
-
             ->orderBy('products.book_name');
     }
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index(Request $request)
     {
         $movements = $this->getReportQuery($request)

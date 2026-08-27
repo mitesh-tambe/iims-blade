@@ -192,7 +192,7 @@ class StockAdjustmentController extends Controller
          */
             StockMovements::create([
                 'product_id' => $adjustment->product_id,
-                'type' => 'adjustment_reversal',
+                'type' => 'adjustment',
                 'quantity' => -$stockMovement->quantity,
                 'reference_type' => StockAdjustment::class,
                 'reference_id' => $adjustment->id,
