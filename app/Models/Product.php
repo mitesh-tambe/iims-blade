@@ -113,4 +113,9 @@ class Product extends Model
     {
         return $this->hasMany(PurchaseItem::class);
     }
+
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovements::class, 'product_id');
+    }
 }

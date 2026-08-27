@@ -6,6 +6,9 @@
             @csrf
             @method('PUT')
 
+            <input type="hidden" name="page" value="{{ request('page') }}">
+            <input type="hidden" name="search" value="{{ request('search') }}">
+
             <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-6 space-y-4">
 
                 <legend class="fieldset-legend text-lg font-semibold">

@@ -424,6 +424,8 @@
                         return;
                     }
 
+                    row.dataset.availableStock = selected.available_stock ?? '';
+
                     // Save maximum allowed discount on this row
                     row.dataset.maxDiscount = parseFloat(selected.disc_from_company || 0);
 
@@ -432,6 +434,24 @@
                     discountInput.max = row.dataset.maxDiscount;
 
                     const qtyInput = row.querySelector('.quantity-input');
+
+                    if (qtyInput) {
+                        qtyInput.addEventListener('input', function() {
+
+                            const availableStock = parseFloat(row.dataset.availableStock);
+                            const quantity = parseFloat(this.value);
+
+                            if (
+                                !isNaN(availableStock) &&
+                                !isNaN(quantity) &&
+                                quantity > availableStock
+                            ) {
+                                alert(`Only ${availableStock} quantity is available in stock.`);
+
+                                this.value = availableStock;
+                            }
+                        });
+                    }
 
                     const priceInput = row.querySelector('.purchase-price');
 

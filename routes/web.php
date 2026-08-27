@@ -11,6 +11,7 @@ use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\RackController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\StockAdjustmentController;
 use App\Http\Controllers\StockMovementsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
@@ -80,6 +81,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('invoices', PurchaseController::class);
     Route::resource('users', UserController::class);
     Route::resource('sales', SaleController::class);
+
+    Route::get(
+        '/stock-adjustments/product-search',
+        [StockAdjustmentController::class, 'productSearch']
+    )->name('stock-adjustments.product-search');
+    Route::resource('stock-adjustments', StockAdjustmentController::class);
 
     Route::get('/reports', [StockMovementsController::class, 'index'])
         ->name('reports.index');

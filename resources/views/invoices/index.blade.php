@@ -1,5 +1,9 @@
 <x-app-layout>
 
+    @php
+        $filterParams = request()->only(['search', 'page']);
+    @endphp
+
     <div class="overflow-x-auto space-y-4">
 
         {{-- 🔝 Top Bar --}}
@@ -30,7 +34,7 @@
                     <th>Vendor Name</th>
                     <th>Purchase Date</th>
                     <th>Total Amount</th>
-                    <th class="text-right">Actions</th>
+                    {{-- <th class="text-right">Actions</th> --}}
                 </tr>
             </thead>
 
@@ -52,21 +56,21 @@
                         <td>₹ {{ number_format($purchase->total_amount, 2) }}</td>
 
 
-                        <td class="text-right space-x-1">
-                            {{-- 👁 View --}}
+                        {{-- <td class="text-right space-x-1">
+                    
                             <a href="{{ route('invoices.show', ['invoice' => $purchase->id]) }}"
                                 class="btn btn-xs btn-info">
                                 <i class="fa-solid fa-eye"></i>
                             </a>
 
                             @if (auth()->user()->email === 'admin@gmail.com' || ($purchase->purchase_date && $purchase->purchase_date->isToday()))
-                                {{-- ✏️ Edit --}}
-                                <a href="{{ route('invoices.edit', ['invoice' => $purchase->id]) }}"
+                            
+                                <a href="{{ route('invoices.edit', array_merge(['invoice' => $purchase->id], $filterParams)) }}"
                                     class="btn btn-xs btn-warning">
                                     <i class="fa-solid fa-pencil"></i>
                                 </a>
 
-                                {{-- ❌ Delete --}}
+                                
                                 <form action="{{ route('invoices.destroy', ['invoice' => $purchase->id]) }}"
                                     method="POST" class="inline"
                                     onsubmit="return confirm('Are you sure you want to delete this invoice?')">
@@ -77,7 +81,7 @@
                                     </button>
                                 </form>
                             @endif
-                        </td>
+                        </td> --}}
                     </tr>
                 @empty
                     <tr>

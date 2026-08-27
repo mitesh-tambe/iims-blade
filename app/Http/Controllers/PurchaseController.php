@@ -152,7 +152,6 @@ class PurchaseController extends Controller
             'vendor_id' => 'nullable|exists:vendors,id',
             'total_amount' => 'required|numeric|min:0',
             'ref_no' => 'required|string|max:255|unique:purchases,ref_no',
-
             'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',
@@ -175,11 +174,13 @@ class PurchaseController extends Controller
             // Create Purchase Items + Stock Movements
             foreach ($validated['products'] as $item) {
 
+                $quantity = (int) $item['quantity'];
+
                 // Create Purchase Item
                 PurchaseItem::create([
                     'purchase_id' => $purchase->id,
                     'product_id' => $item['product_id'],
-                    'quantity' => (int) $item['quantity'],
+                    'quantity' => $quantity,
                     'cost_price' => (float) $item['purchase_price'],
                 ]);
 
@@ -187,7 +188,7 @@ class PurchaseController extends Controller
                 StockMovements::create([
                     'product_id' => $item['product_id'],
                     'type' => 'purchase',
-                    'quantity' => (int) $item['quantity'],
+                    'quantity' => $quantity,
                     'reference_type' => Purchase::class,
                     'reference_id' => $purchase->id,
                     'remarks' => 'Purchase Invoice: ' . $purchase->invoice_no,
@@ -235,87 +236,6 @@ class PurchaseController extends Controller
         return view('invoices.edit', compact('purchase', 'vendors', 'products'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    // public function update(Request $request, $id)
-    // {
-    //     $validated = $request->validate([
-
-    //         'invoice_no' => 'required|string|max:255',
-
-    //         'purchase_date' => 'required|date',
-
-    //         'vendor_id' => 'nullable|exists:vendors,id',
-
-    //         'total_amount' => 'required|numeric|min:0',
-
-    //         'ref_no' => 'required|string|max:255|unique:purchases,ref_no,' . $id,
-
-    //         'products' => 'required|array|min:1',
-
-    //         'products.*.product_id' => 'required|exists:products,id',
-
-    //         'products.*.quantity' => 'required|integer|min:1',
-
-    //         'products.*.purchase_price' => 'required|numeric|min:0',
-
-    //     ]);
-
-    //     DB::beginTransaction();
-
-    //     try {
-
-    //         $purchase = Purchase::findOrFail($id);
-
-    //         // Update Purchase
-    //         $purchase->update([
-
-    //             'vendor_id' => $validated['vendor_id'] ?? null,
-
-    //             'invoice_no' => $validated['invoice_no'],
-
-    //             'purchase_date' => $validated['purchase_date'] ?? now(),
-
-    //             'total_amount' => $validated['total_amount'],
-
-    //             'ref_no' => $validated['ref_no'],
-
-    //         ]);
-
-    //         // Remove Old Items
-    //         $purchase->items()->delete();
-
-    //         // Recreate Items
-    //         foreach ($validated['products'] as $item) {
-
-    //             PurchaseItem::create([
-
-    //                 'purchase_id' => $purchase->id,
-
-    //                 'product_id' => $item['product_id'],
-
-    //                 'quantity' => (int) $item['quantity'],
-
-    //                 'cost_price' => (float) $item['purchase_price'],
-
-    //             ]);
-    //         }
-
-    //         DB::commit();
-
-    //         return redirect()
-    //             ->route('invoices.index')
-    //             ->with('success', 'Invoice updated successfully.');
-    //     } catch (\Exception $e) {
-
-    //         DB::rollBack();
-
-    //         return back()
-    //             ->withInput()
-    //             ->with('error', $e->getMessage());
-    //     }
-    // }
 
     public function update(Request $request, $id)
     {
@@ -397,8 +317,21 @@ class PurchaseController extends Controller
 
             DB::commit();
 
+            $filters = [];
+
+            $map = [
+                'search' => 'search',
+                'page' => 'page',
+            ];
+
+            foreach ($map as $from => $to) {
+                if ($request->filled($from)) {
+                    $filters[$to] = $request->input($from);
+                }
+            }
+
             return redirect()
-                ->route('invoices.index')
+                ->route('invoices.index', $filters)
                 ->with('success', 'Invoice updated successfully.');
         } catch (\Exception $e) {
 
