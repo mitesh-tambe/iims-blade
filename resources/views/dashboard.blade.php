@@ -62,7 +62,8 @@
                             Generate Bill
                         </h3>
                     </div>
-                    <form action="{{ route('sales.store') }}" method="POST">
+                    <form action="{{ route('sales.store') }}" method="POST" target="_blank"
+                        onsubmit="setTimeout(() => window.location.reload(), 1000)">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
