@@ -34,7 +34,7 @@
                     <th>Vendor Name</th>
                     <th>Purchase Date</th>
                     <th>Total Amount</th>
-                    {{-- <th class="text-right">Actions</th> --}}
+                    <th class="text-right">Actions</th>
                 </tr>
             </thead>
 
@@ -56,7 +56,7 @@
                         <td>₹ {{ number_format($purchase->total_amount, 2) }}</td>
 
 
-                        {{-- <td class="text-right space-x-1">
+                        <td class="text-right space-x-1">
                     
                             <a href="{{ route('invoices.show', ['invoice' => $purchase->id]) }}"
                                 class="btn btn-xs btn-info">
@@ -81,7 +81,7 @@
                                     </button>
                                 </form>
                             @endif
-                        </td> --}}
+                        </td>
                     </tr>
                 @empty
                     <tr>

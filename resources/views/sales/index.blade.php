@@ -18,6 +18,8 @@
             </div>
         @endif
 
+        <x-charts.bar-chart id="salesChart" title="Sales Overview" description="Sales amount" />
+
         {{-- 📋 Sales Table --}}
         <table class="table">
             <thead>
