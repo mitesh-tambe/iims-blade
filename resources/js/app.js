@@ -4,13 +4,16 @@ import '../css/app.css';
 import Alpine from 'alpinejs';
 import TomSelect from "tom-select";
 import "tom-select/dist/css/tom-select.css";
+import Chart from 'chart.js/auto';
 
+window.Chart = Chart;
 
 window.Alpine = Alpine;
 
 Alpine.start();
 
 window.TomSelect = TomSelect;
+
 
 function appendAndSelect(selectId, item) {
     const select = document.getElementById(selectId);

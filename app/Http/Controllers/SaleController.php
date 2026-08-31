@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\StockMovements;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,13 +17,111 @@ class SaleController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // public function index()
+    // {
+    //     $sales = Sale::where('invoice_no', 'like', '%' . request('search') . '%')
+    //         ->latest()
+    //         ->paginate(10)
+    //         ->withQueryString();
+    //     return view('sales.index', compact('sales'));
+    // }
+
     public function index()
     {
+        // Paginated list for table view
         $sales = Sale::where('invoice_no', 'like', '%' . request('search') . '%')
             ->latest()
             ->paginate(10)
             ->withQueryString();
-        return view('sales.index', compact('sales'));
+
+        // 1. Weekly Data (Last 7 Days)
+        $weeklyRaw = Sale::select(
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('SUM(total_amount) as total')
+        )
+            ->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay())
+            ->groupBy('date')
+            ->pluck('total', 'date');
+
+        $weeklyLabels = [];
+        $weeklyValues = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i)->format('Y-m-d');
+            $weeklyLabels[] = Carbon::now()->subDays($i)->format('D, M j');
+            $weeklyValues[] = (float) ($weeklyRaw[$date] ?? 0);
+        }
+
+        // dd($weeklyLabels, $weeklyValues);
+
+        // 2. Monthly Data (Current Year by Month)
+        $monthlyRaw = Sale::select(
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('SUM(total_amount) as total')
+        )
+            ->whereYear('created_at', Carbon::now()->year)
+            ->groupBy('month')
+            ->pluck('total', 'month');
+
+        $monthlyLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $monthlyValues = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $monthlyValues[] = (float) ($monthlyRaw[$m] ?? 0);
+        }
+
+        // 3. Yearly Data (Last 5 Years)
+        $yearlyRaw = Sale::select(
+            DB::raw('YEAR(created_at) as year'),
+            DB::raw('SUM(total_amount) as total')
+        )
+            ->where('created_at', '>=', Carbon::now()->subYears(4)->startOfYear())
+            ->groupBy('year')
+            ->pluck('total', 'year');
+
+        $yearlyLabels = [];
+        $yearlyValues = [];
+        $currentYear = (int) Carbon::now()->year;
+        for ($y = $currentYear - 4; $y <= $currentYear; $y++) {
+            $yearlyLabels[] = (string) $y;
+            $yearlyValues[] = (float) ($yearlyRaw[$y] ?? 0);
+        }
+
+        // Combine chart datasets
+        $chartData = [
+            'weekly' => [
+                'labels' => $weeklyLabels,
+                'datasets' => [[
+                    'label' => 'Weekly Sales (₹)',
+                    'data' => $weeklyValues,
+                    'backgroundColor' => 'rgba(59, 130, 246, 0.5)',
+                    'borderColor' => 'rgb(59, 130, 246)',
+                    'borderWidth' => 1,
+                ]],
+            ],
+            'monthly' => [
+                'labels' => $monthlyLabels,
+                'datasets' => [[
+                    'label' => 'Monthly Sales (₹)',
+                    'data' => $monthlyValues,
+                    'backgroundColor' => 'rgba(16, 185, 129, 0.5)',
+                    'borderColor' => 'rgb(16, 185, 129)',
+                    'borderWidth' => 1,
+                ]],
+            ],
+            'yearly' => [
+                'labels' => $yearlyLabels,
+                'datasets' => [[
+                    'label' => 'Yearly Sales (₹)',
+                    'data' => $yearlyValues,
+                    'backgroundColor' => 'rgba(139, 92, 246, 0.5)',
+                    'borderColor' => 'rgb(139, 92, 246)',
+                    'borderWidth' => 1,
+                ]],
+            ],
+        ];
+
+        // dd($chartData);
+
+        return view('sales.index', compact('sales', 'chartData'));
     }
 
     /**

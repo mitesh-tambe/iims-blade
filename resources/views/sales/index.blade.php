@@ -18,7 +18,7 @@
             </div>
         @endif
 
-        <x-charts.bar-chart id="salesChart" title="Sales Overview" description="Sales amount" />
+        <x-charts.bar-chart id="salesChart" title="Sales Overview" description="Sales amount" :chartData="$chartData"/>
 
         {{-- 📋 Sales Table --}}
         <table class="table">
