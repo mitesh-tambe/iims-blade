@@ -107,7 +107,7 @@
                                         </td>
 
                                         <td>
-                                            ₹ {{ number_format($item->cost_price, 2) }}
+                                            ₹ {{ number_format($item->product->mrp, 2) }}
                                         </td>
 
                                         <td>
