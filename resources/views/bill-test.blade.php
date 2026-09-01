@@ -307,7 +307,7 @@
 
                         <td class="discount">{{ $item->discount }}</td>
 
-                        <td class="price" style="padding-left:1.5px;">{{ number_format($item->mrp, 0) }}</td>
+                        <td class="price" style="padding-left:2px;">{{ number_format($item->mrp, 0) }}</td>
 
                         <td class="amount" style="padding-left:2px;">{{ number_format($item->net_amount, 0) }}</td>
                     </tr>
