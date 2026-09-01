@@ -124,7 +124,7 @@
 
             width: 12%;
 
-            text-align: center;
+            text-align: right;
 
             white-space: nowrap;
         }
@@ -290,8 +290,8 @@
                 <tr>
                     <th>Item</th>
                     <th class="qty">Qty</th>
-                    <th class="discount">%</th>
                     <th class="price">MRP</th>
+                    <th class="discount">%</th>
                     <th class="amount">Amt</th>
                 </tr>
 
@@ -303,8 +303,8 @@
                     <tr>
                         <td>{{ $item->product->book_name }}</td>
                         <td class="qty">{{ $item->quantity }}</td>
+                        <td class="price" style="padding-left:2px;">{{ (int) $item->mrp }}</td>
                         <td class="discount">{{ $item->discount }}</td>
-                        <td class="price" style="padding-left:4px;">{{ (int) $item->mrp }}</td>
                         <td class="amount" style="padding-left:2px;">{{ (int) $item->net_amount }}</td>
                     </tr>
                 @endforeach
