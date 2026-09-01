@@ -30,7 +30,7 @@
 
             width: 72mm;
 
-            padding: 3mm;
+            padding: 1mm;
 
             box-sizing: border-box;
         }
@@ -114,7 +114,7 @@
         th:first-child,
         td:first-child {
 
-            width: 55%;
+            width: 50%;
 
             padding-right: 4px;
         }
@@ -152,7 +152,7 @@
         /* Amount */
         .amount {
 
-            width: 13%;
+            width: 15%;
 
             text-align: right;
 
@@ -309,7 +309,7 @@
 
                         <td class="price">{{ number_format($item->mrp, 0) }}</td>
 
-                        <td class="amount">{{ number_format($item->net_amount, 0) }}</td>
+                        <td class="amount" style="padding-left:2px;">{{ number_format($item->net_amount, 0) }}</td>
                     </tr>
                 @endforeach
 
@@ -331,13 +331,13 @@
     <div class="divider"></div>
 
     {{-- PAYMENT --}}
-    <div class="small-text" style="padding-left:2px;">
+    <div class="small-text" style="padding-left:4px;">
 
-        Payment Mode: CASH
+        Payment Mode: {{ $sale->payment_mode }}
 
     </div>
 
-    <div class="small-text" style="padding-left:2px;">
+    <div class="small-text" style="padding-left:4px;">
 
         Created by: {{ $sale->creator?->name ?? '-' }}
 

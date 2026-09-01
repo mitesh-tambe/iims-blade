@@ -18,7 +18,9 @@
             </div>
         @endif
 
+        @if (auth()->user()->email === 'admin@gmail.com')
         <x-charts.bar-chart id="salesChart" title="Sales Overview" description="Sales amount" :chartData="$chartData"/>
+        @endif
 
         {{-- 📋 Sales Table --}}
         <table class="table">
