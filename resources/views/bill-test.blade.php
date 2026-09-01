@@ -302,14 +302,10 @@
                 @foreach ($sale->saleItems as $item)
                     <tr>
                         <td>{{ $item->product->book_name }}</td>
-
                         <td class="qty">{{ $item->quantity }}</td>
-
                         <td class="discount">{{ $item->discount }}</td>
-
-                        <td class="price" style="padding-left:2px;">{{ number_format($item->mrp, 0) }}</td>
-
-                        <td class="amount" style="padding-left:2px;">{{ number_format($item->net_amount, 0) }}</td>
+                        <td class="price" style="padding-left:4px;">{{ (int) $item->mrp }}</td>
+                        <td class="amount" style="padding-left:2px;">{{ (int) $item->net_amount }}</td>
                     </tr>
                 @endforeach
 
