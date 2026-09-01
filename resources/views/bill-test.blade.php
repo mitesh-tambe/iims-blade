@@ -114,7 +114,7 @@
         th:first-child,
         td:first-child {
 
-            width: 50%;
+            width: 45%;
 
             padding-right: 4px;
         }
@@ -122,7 +122,7 @@
         /* Discount */
         .discount {
 
-            width: 10%;
+            width: 12%;
 
             text-align: center;
 
@@ -132,7 +132,7 @@
         /* Qty */
         .qty {
 
-            width: 10%;
+            width: 12%;
 
             text-align: center;
 
@@ -188,7 +188,7 @@
 
             margin-top: 10px;
 
-            font-size: 12px;
+            font-size: 11px;
 
             line-height: 1.5;
         }
@@ -307,7 +307,7 @@
 
                         <td class="discount">{{ $item->discount }}</td>
 
-                        <td class="price">{{ number_format($item->mrp, 0) }}</td>
+                        <td class="price" style="padding-left:1.5px;">{{ number_format($item->mrp, 0) }}</td>
 
                         <td class="amount" style="padding-left:2px;">{{ number_format($item->net_amount, 0) }}</td>
                     </tr>
@@ -345,9 +345,8 @@
 
     {{-- FOOTER --}}
     <div class="footer">
-
-        THANK YOU! VISIT AGAIN!
-
+        <p style="margin-bottom: 2px;">NO EXCHANGE NO REFUND</p>
+        <p style="margin-top: 0;">THANK YOU! VISIT AGAIN!</p>
     </div>
 
     </div>
