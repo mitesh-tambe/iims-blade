@@ -16,11 +16,14 @@ class StockAdjustment extends Model
         'remarks',
         'created_by',
         'type',
+        'purchase_id',
+        'unit_cost',
     ];
 
     protected $casts = [
         'adjustment_date' => 'date',
         'quantity' => 'integer',
+        'unit_cost' => 'decimal:2',
     ];
 
     public function product(): BelongsTo
@@ -31,5 +34,10 @@ class StockAdjustment extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function purchase(): BelongsTo
+    {
+        return $this->belongsTo(Purchase::class);
     }
 }

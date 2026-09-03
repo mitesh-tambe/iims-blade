@@ -13,45 +13,20 @@
         {{-- 🎯 Filters --}}
 
         <form method="GET" action="{{ route('reports.index') }}" id="filterForm"
-            class="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-4">
-
+            class="flex flex-wrap justify-end gap-3 mt-4">
 
             {{-- Preserve Search --}}
             @if (request('search'))
                 <input type="hidden" name="search" value="{{ request('search') }}">
             @endif
 
-
-            {{-- Start Date --}}
-            <div>
-                <label class="block text-sm font-medium mb-1">
-                    Start Date
-                </label>
-
-                <input type="date" name="start_date" value="{{ request('start_date') }}"
-                    class="input input-bordered w-full" onchange="submitFilters()">
-            </div>
-
-
-            {{-- End Date --}}
-            <div>
-                <label class="block text-sm font-medium mb-1">
-                    End Date
-                </label>
-
-                <input type="date" name="end_date" value="{{ request('end_date') }}"
-                    class="input input-bordered w-full" onchange="submitFilters()">
-            </div>
-
-
             {{-- Level --}}
-            <div>
+            <div class="w-full sm:w-48">
                 <label class="block text-sm font-medium mb-1">
                     Level
                 </label>
 
                 <select name="level" class="select select-bordered w-full" onchange="submitFilters()">
-
                     <option value="">All Levels</option>
 
                     <option value="normal" @selected(request('level') === 'normal')>
@@ -61,14 +36,11 @@
                     <option value="critical" @selected(request('level') === 'critical')>
                         Critical
                     </option>
-
                 </select>
             </div>
 
-
             {{-- Export + Clear --}}
             <div class="flex gap-2 justify-end items-end">
-
                 {{-- Export --}}
                 <a href="{{ route('reports.export', request()->query()) }}"
                     class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
@@ -80,7 +52,6 @@
                     class="btn btn-outline btn-sm {{ !$hasFilters ? 'btn-disabled' : '' }}">
                     Clear Filters
                 </a>
-
             </div>
 
         </form>
@@ -142,7 +113,9 @@
 
                         {{-- Last Movement Date --}}
                         <td>
-                            {{ $movement->created_at ? \Carbon\Carbon::parse($movement->created_at)->format('d/m/Y h:i A') : '-' }}
+                            {{ $movement->latest_movement_date
+                                ? \Carbon\Carbon::parse($movement->latest_movement_date)->format('d/m/Y h:i A')
+                                : '-' }}
                         </td>
 
 

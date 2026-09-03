@@ -118,4 +118,9 @@ class Product extends Model
     {
         return $this->hasMany(StockMovements::class, 'product_id');
     }
+
+    public function stockAdjustments()
+    {
+        return $this->hasMany(StockAdjustment::class);
+    }
 }

@@ -214,14 +214,87 @@ class PurchaseController extends Controller
     /**
      * Display the specified resource.
      */
+    // public function show($id)
+    // {
+    //     $purchase = Purchase::with([
+    //         'vendor',
+    //         'items.product'
+    //     ])->findOrFail($id);
+
+    //     // dd($purchase->toArray());
+    //     return view('invoices.view', compact('purchase'));
+    // }
+
+    // public function show($id)
+    // {
+    //     $purchase = Purchase::with([
+    //         'vendor',
+    //         'items.product',
+    //         'stockAdjustments',
+    //     ])->findOrFail($id);
+
+    //     /*
+    // |--------------------------------------------------------------------------
+    // | Calculate corrected invoice quantities and totals
+    // |--------------------------------------------------------------------------
+    // */
+
+    //     $calculatedTotal = 0;
+
+    //     foreach ($purchase->items as $item) {
+
+    //         // Get all adjustments for this purchase + product
+    //         $adjustmentQuantity = $purchase->stockAdjustments
+    //             ->where('product_id', $item->product_id)
+    //             ->sum('quantity');
+
+    //         // Original purchased quantity + adjustments
+    //         $correctedQuantity = (int) $item->quantity + (int) $adjustmentQuantity;
+
+    //         // Prevent negative quantity
+    //         $correctedQuantity = max(0, $correctedQuantity);
+
+    //         // Current product MRP (includes price changes)
+    //         $currentPrice = (float) ($item->product?->mrp ?? 0);
+
+    //         // Store calculated values on the item for Blade
+    //         $item->display_quantity = $correctedQuantity;
+    //         $item->display_unit_price = $currentPrice;
+    //         $item->display_total = $correctedQuantity * $currentPrice;
+
+    //         $calculatedTotal += $item->display_total;
+    //     }
+
+    //     // Use the recalculated total for this invoice view
+    //     $purchase->display_total_amount = $calculatedTotal;
+
+    //     return view('invoices.view', compact('purchase'));
+    // }
+
     public function show($id)
     {
         $purchase = Purchase::with([
             'vendor',
-            'items.product'
+            'items.product',
+            'stockAdjustments.product',
         ])->findOrFail($id);
 
-        // dd($purchase->toArray());
+        $calculatedTotal = 0;
+
+        foreach ($purchase->items as $item) {
+            $adjustmentQuantity = $purchase->stockAdjustments
+                ->where('product_id', $item->product_id)
+                ->sum('quantity');
+            $correctedQuantity = (int) $item->quantity + (int) $adjustmentQuantity;
+            $correctedQuantity = max(0, $correctedQuantity);
+            $currentPrice = (float) ($item->product?->mrp ?? 0);
+            $item->display_quantity = $correctedQuantity;
+            $item->display_unit_price = $currentPrice;
+            $item->display_total = $correctedQuantity * $currentPrice;
+            $calculatedTotal += $item->display_total;
+        }
+
+        $purchase->display_total_amount = $calculatedTotal;
         return view('invoices.view', compact('purchase'));
     }
 

@@ -43,12 +43,7 @@
                         <label class="label">Adjustment Type</label>
 
                         <input type="text" class="input input-bordered w-full"
-                            value="{{ $stockAdjustment->type === 'add'
-                                ? 'Add Stock'
-                                : ($stockAdjustment->type === 'remove'
-                                    ? 'Remove Stock'
-                                    : '-') }}"
-                            readonly />
+                            value="{{ $stockAdjustment->type ?? '-' }}" readonly />
                     </div>
 
                     {{-- Quantity --}}
@@ -57,6 +52,15 @@
 
                         <input type="text" class="input input-bordered w-full"
                             value="{{ $stockAdjustment->quantity ?? '-' }}" readonly />
+                    </div>
+
+                    {{-- Unit Cost --}}
+                    <div>
+                        <label class="label">Unit Cost</label>
+
+                        <input type="text" class="input input-bordered w-full"
+                            value="{{ $stockAdjustment->unit_cost ? '₹ ' . number_format($stockAdjustment->unit_cost, 2) : '-' }}"
+                            readonly />
                     </div>
 
                     {{-- Reason --}}

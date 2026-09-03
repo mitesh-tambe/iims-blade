@@ -33,7 +33,8 @@
                     <th>Invoice No.</th>
                     <th>Vendor Name</th>
                     <th>Purchase Date</th>
-                    <th>Total Amount</th>
+                    {{-- <th>Total Amount</th> --}}
+                    <th>Status</th>
                     <th class="text-right">Actions</th>
                 </tr>
             </thead>
@@ -53,9 +54,11 @@
                             {{ $purchase->purchase_date ? $purchase->purchase_date->format('d/m/Y') : '-' }}
                         </td>
 
-                        <td>₹ {{ number_format($purchase->total_amount, 2) }}</td>
+                        {{-- <td>₹ {{ number_format($purchase->total_amount, 2) }}</td> --}}
 
-
+                        <td>
+                           {{ $purchase->status ?? '-' }} 
+                        </td>
                         <td class="text-right space-x-1">
                     
                             <a href="{{ route('invoices.show', ['invoice' => $purchase->id]) }}"
@@ -65,13 +68,13 @@
 
                             @if (auth()->user()->email === 'admin@gmail.com' || ($purchase->purchase_date && $purchase->purchase_date->isToday()))
                             
-                                <a href="{{ route('invoices.edit', array_merge(['invoice' => $purchase->id], $filterParams)) }}"
+                                {{-- <a href="{{ route('invoices.edit', array_merge(['invoice' => $purchase->id], $filterParams)) }}"
                                     class="btn btn-xs btn-warning">
                                     <i class="fa-solid fa-pencil"></i>
-                                </a>
+                                </a> --}}
 
                                 
-                                <form action="{{ route('invoices.destroy', ['invoice' => $purchase->id]) }}"
+                                {{-- <form action="{{ route('invoices.destroy', ['invoice' => $purchase->id]) }}"
                                     method="POST" class="inline"
                                     onsubmit="return confirm('Are you sure you want to delete this invoice?')">
                                     @csrf
@@ -79,7 +82,7 @@
                                     <button type="submit" class="btn btn-xs btn-error">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
-                                </form>
+                                </form> --}}
                             @endif
                         </td>
                     </tr>

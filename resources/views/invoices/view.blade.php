@@ -43,7 +43,7 @@
                         <label class="label">Total Amount</label>
 
                         <input type="text" class="input input-bordered w-full"
-                            value="₹ {{ number_format($purchase->total_amount, 2) }}" readonly />
+                            value="₹ {{ number_format($purchase->display_total_amount, 2) }}" readonly />
                     </div>
 
                     {{-- Ref No --}}
@@ -89,45 +89,33 @@
 
                                 @forelse($purchase->items as $index => $item)
                                     <tr>
-
                                         <td>
                                             {{ $index + 1 }}
                                         </td>
-
                                         <td>
                                             {{ $item->product?->book_name ?? '-' }}
                                         </td>
-
                                         <td>
                                             {{ $item->product?->barcode_no ?? '-' }}
                                         </td>
-
                                         <td>
-                                            {{ $item->quantity }}
+                                            {{ $item->display_quantity }}
                                         </td>
-
                                         <td>
-                                            ₹ {{ number_format($item->product->mrp, 2) }}
+                                            ₹ {{ number_format($item->display_unit_price, 2) }}
                                         </td>
-
                                         <td>
-                                            ₹ {{ number_format($item->cost_price, 2) }}
+                                            ₹ {{ number_format($item->display_total, 2) }}
                                         </td>
-
                                         <td>
                                             {{ $item->product?->rack_no ?? '-' }}
                                         </td>
-
                                     </tr>
-
                                 @empty
-
                                     <tr>
-
                                         <td colspan="7" class="text-center text-gray-500">
                                             No products found.
                                         </td>
-
                                     </tr>
                                 @endforelse
 
@@ -137,6 +125,111 @@
 
                     </div>
 
+                </div>
+
+                {{-- STOCK ADJUSTMENTS --}}
+                <div class="space-y-3 pt-6">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-semibold text-lg">
+                            Stock Adjustments
+                        </h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="table table-zebra">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Adjustment No.</th>
+                                    <th>Product</th>
+                                    <th>Type</th>
+                                    <th>Quantity</th>
+                                    <th>MRP</th>
+                                    <th>Reason</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @forelse($purchase->stockAdjustments as $index => $adjustment)
+                                    <tr>
+
+                                        {{-- Sr No --}}
+                                        <td>
+                                            {{ $index + 1 }}
+                                        </td>
+
+                                        {{-- Adjustment No --}}
+                                        <td class="font-medium">
+                                            {{ $adjustment->adjustment_no }}
+                                        </td>
+
+                                        {{-- Product --}}
+                                        <td>
+                                            {{ $adjustment->product?->book_name ?? '-' }}
+                                        </td>
+
+                                        {{-- Type --}}
+                                        <td>
+                                            @if ($adjustment->type === 'add')
+                                                <span class="badge badge-success">
+                                                    Add Stock
+                                                </span>
+                                            @elseif ($adjustment->type === 'remove')
+                                                <span class="badge badge-error">
+                                                    Remove Stock
+                                                </span>
+                                            @elseif ($adjustment->type === 'price_change')
+                                                <span class="badge badge-warning">
+                                                    Price Change
+                                                </span>
+                                            @else
+                                                <span class="badge">
+                                                    {{ ucfirst($adjustment->type ?? '-') }}
+                                                </span>
+                                            @endif
+                                        </td>
+
+                                        {{-- Quantity --}}
+                                        <td>
+                                            @if ($adjustment->quantity === null)
+                                                -
+                                            @elseif ($adjustment->quantity > 0)
+                                                +{{ $adjustment->quantity }}
+                                            @else
+                                                {{ $adjustment->quantity }}
+                                            @endif
+                                        </td>
+
+                                        {{-- MRP --}}
+                                        <td>
+                                            @if ($adjustment->unit_cost !== null)
+                                                ₹ {{ number_format($adjustment->unit_cost, 2) }}
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+
+                                        {{-- Reason --}}
+                                        <td>
+                                            {{ $adjustment->reason ?? '-' }}
+                                        </td>
+
+                                        {{-- Date --}}
+                                        <td>
+                                            {{ $adjustment->adjustment_date ? \Carbon\Carbon::parse($adjustment->adjustment_date)->format('d/m/Y') : '-' }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="9" class="text-center text-gray-500">
+                                            No stock adjustments found for this invoice.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 {{-- FOOTER --}}

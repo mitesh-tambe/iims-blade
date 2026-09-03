@@ -92,7 +92,7 @@
                             </a>
 
                             {{-- ❌ Delete --}}
-                            <form action="{{ route('stock-adjustments.destroy', $adjustment) }}" method="POST"
+                            {{-- <form action="{{ route('stock-adjustments.destroy', $adjustment) }}" method="POST"
                                 class="inline"
                                 onsubmit="return confirm('Are you sure you want to delete this stock adjustment?')">
                                 @csrf
@@ -101,8 +101,7 @@
                                 <button type="submit" class="btn btn-xs btn-error">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
-                            </form>
-
+                            </form> --}}
                         </td>
 
                     </tr>

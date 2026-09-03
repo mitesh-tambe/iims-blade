@@ -86,6 +86,12 @@ Route::middleware('auth')->group(function () {
         '/stock-adjustments/product-search',
         [StockAdjustmentController::class, 'productSearch']
     )->name('stock-adjustments.product-search');
+
+    Route::get(
+        '/stock-adjustments/purchase-search',
+        [StockAdjustmentController::class, 'purchaseSearch']
+    )->name('stock-adjustments.purchase-search');
+    
     Route::resource('stock-adjustments', StockAdjustmentController::class);
 
     Route::get('/reports', [StockMovementsController::class, 'index'])

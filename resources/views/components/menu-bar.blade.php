@@ -242,7 +242,7 @@
                             </a>
                         </li>
 
-                        {{-- <li>
+                        <li>
                             <a href="{{ route('stock-adjustments.index') }}"
                                 class="is-drawer-close:tooltip is-drawer-close:tooltip-right {{ request()->routeIs('stock-adjustments.*') ? 'sidebar-active' : '' }}"
                                 data-tip="Stock Adjustments">
@@ -262,7 +262,7 @@
                                     Stock Adjustments
                                 </span>
                             </a>
-                        </li> --}}
+                        </li>
 
                     </ul>
                 </details>
