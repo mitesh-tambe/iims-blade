@@ -35,7 +35,8 @@
                         request()->routeIs('authors.*') ||
                         request()->routeIs('categories.*') ||
                         request()->routeIs('publications.*') ||
-                        request()->routeIs('racks.*')) open @endif>
+                        request()->routeIs('racks.*') ||
+                        request()->routeIs('find-id.*')) open @endif>
 
                     <summary class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Master">
 
@@ -162,6 +163,27 @@
                             </a>
                         </li>
 
+                        {{-- find ID --}}
+                         <li>
+                            <a href="{{ route('find-id.index') }}"
+                                class="is-drawer-close:tooltip is-drawer-close:tooltip-right {{ request()->routeIs('find-id.*') ? 'sidebar-active' : '' }}"
+                                data-tip="Find ID">
+
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round"
+                                    stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor"
+                                    class="my-1.5 inline-block size-4">
+
+                                    <path d="M20 7h-9"></path>
+                                    <path d="M14 17H5"></path>
+                                    <circle cx="17" cy="17" r="3"></circle>
+                                    <circle cx="7" cy="7" r="3"></circle>
+
+                                </svg>
+
+                                <span class="is-drawer-close:hidden">Find ID</span>
+                            </a>
+                        </li>
+
                     </ul>
                 </details>
             </li>
@@ -171,7 +193,7 @@
                  STOCK MANAGEMENT
             ====================================================== --}}
             <li>
-                <details @if (request()->routeIs('vendors.*') || request()->routeIs('invoices.*')) open @endif>
+                <details @if (request()->routeIs('vendors.*') || request()->routeIs('invoices.*') || request()->routeIs('stock-adjustments.*')) open @endif>
 
                     <summary class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                         data-tip="Stock Management">

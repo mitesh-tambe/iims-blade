@@ -15,6 +15,7 @@ use App\Http\Controllers\StockAdjustmentController;
 use App\Http\Controllers\StockMovementsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\FindIdController;
 use App\Models\Product;
 use App\Models\Sale;
 use Illuminate\Support\Facades\Route;
@@ -99,6 +100,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/reports/export', [StockMovementsController::class, 'export'])
         ->name('reports.export');
+
+    Route::get('/find-id', [FindIdController::class, 'index'])->name('find-id.index');
 });
 
 require __DIR__ . '/auth.php';
