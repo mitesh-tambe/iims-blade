@@ -334,6 +334,7 @@
                     if (!query.length) {
                         return callback();
                     }
+                    // debugger;
 
                     fetch(`/products/search?q=${encodeURIComponent(query)}`)
                         .then(response => response.json())

@@ -350,6 +350,54 @@ class ProductController extends Controller
         return $writer->toBrowser();
     }
 
+    // public function search(Request $request)
+    // {
+    //     $search = trim($request->q);
+
+    //     if (!$search) {
+    //         return response()->json([]);
+    //     }
+
+    //     $products = Product::with(['author:id,name', 'publication:id,name'])
+    //         ->where(function ($query) use ($search) {
+
+    //             $query->where('book_name', 'LIKE', "%{$search}%")
+    //                 ->orWhere('isbn', 'LIKE', "%{$search}%")
+    //                 ->orWhere('barcode_no', 'LIKE', "%{$search}%");
+    //         })
+    //         ->select(
+    //             'id',
+    //             'book_name',
+    //             'isbn',
+    //             'barcode_no',
+    //             'mrp',
+    //             'author_id',
+    //             'publication_id',
+    //             'disc_from_company'
+    //         )
+    //         ->limit(20)
+    //         ->get();
+
+    //     $products->each(function ($product) {
+
+    //         $stock = StockMovements::where(
+    //             'product_id',
+    //             $product->id
+    //         )->sum('quantity');
+
+    //         $hasMovements = StockMovements::where(
+    //             'product_id',
+    //             $product->id
+    //         )->exists();
+
+    //         $product->available_stock = $hasMovements
+    //             ? $stock
+    //             : null;
+    //     });
+
+    //     return response()->json($products);
+    // }
+
     public function search(Request $request)
     {
         $search = trim($request->q);
@@ -360,7 +408,6 @@ class ProductController extends Controller
 
         $products = Product::with(['author:id,name', 'publication:id,name'])
             ->where(function ($query) use ($search) {
-
                 $query->where('book_name', 'LIKE', "%{$search}%")
                     ->orWhere('isbn', 'LIKE', "%{$search}%")
                     ->orWhere('barcode_no', 'LIKE', "%{$search}%");
@@ -392,7 +439,7 @@ class ProductController extends Controller
 
             $product->available_stock = $hasMovements
                 ? $stock
-                : null;
+                : 0;
         });
 
         return response()->json($products);

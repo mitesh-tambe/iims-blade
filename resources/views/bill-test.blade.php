@@ -299,7 +299,8 @@
 
             <tbody>
 
-                @foreach ($sale->saleItems as $item)
+                {{-- @foreach ($sale->saleItems as $item) --}}
+                @foreach ($sale->saleItems->sortBy('id') as $item)
                     <tr>
                         <td>{{ $item->product->book_name }}</td>
                         <td class="qty">{{ $item->quantity }}</td>
