@@ -342,7 +342,7 @@
             {{-- =====================================================
                  USERS
             ====================================================== --}}
-            @if (auth()->user()->email === 'admin@gmail.com')
+            @if (auth()->user()->email === 'idealbooksale@gmail.com')
                 <li>
                     <a href="{{ route('users.index') }}"
                         class="is-drawer-close:tooltip is-drawer-close:tooltip-right {{ request()->routeIs('users.*') ? 'sidebar-active' : '' }}"

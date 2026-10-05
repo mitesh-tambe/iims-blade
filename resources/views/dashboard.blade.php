@@ -85,8 +85,8 @@
                                 <label class="label">Date *</label>
 
                                 <input type="date" name="sale_date" class="input input-bordered w-full"
-                                    value="{{ auth()->user()->email == 'admin@gmail.com' ? old('sale_date') : now()->toDateString() }}"
-                                    {{ auth()->user()->email == 'admin@gmail.com' ? '' : 'readonly' }} required />
+                                    value="{{ auth()->user()->email == 'idealbooksale@gmail.com' ? old('sale_date') : now()->toDateString() }}"
+                                    {{ auth()->user()->email == 'idealbooksale@gmail.com' ? '' : 'readonly' }} required />
                             </div>
 
                             <div>

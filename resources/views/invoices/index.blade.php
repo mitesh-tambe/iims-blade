@@ -66,7 +66,7 @@
                                 <i class="fa-solid fa-eye"></i>
                             </a>
 
-                            @if (auth()->user()->email === 'admin@gmail.com' || ($purchase->purchase_date && $purchase->purchase_date->isToday()))
+                            @if (auth()->user()->email === 'idealbooksale@gmail.com' || ($purchase->purchase_date && $purchase->purchase_date->isToday()))
                             
                                 {{-- <a href="{{ route('invoices.edit', array_merge(['invoice' => $purchase->id], $filterParams)) }}"
                                     class="btn btn-xs btn-warning">

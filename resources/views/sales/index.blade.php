@@ -18,7 +18,7 @@
             </div>
         @endif
 
-        @if (auth()->user()->email === 'admin@gmail.com')
+        @if (auth()->user()->email === 'idealbooksale@gmail.com')
         <x-charts.bar-chart id="salesChart" title="Sales Overview" description="Sales amount" :chartData="$chartData"/>
         @endif
 
@@ -60,7 +60,7 @@
                                 <i class="fa-solid fa-eye"></i>
                             </a>
 
-                            @if (auth()->user()->email === 'admin@gmail.com')
+                            @if (auth()->user()->email === 'idealbooksale@gmail.com')
                                 {{-- ✏️ Edit --}}
                                 {{-- <a href="{{ route('sales.edit', $sale) }}" class="btn btn-xs btn-warning">
                                     <i class="fa-solid fa-pencil"></i>
