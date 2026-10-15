@@ -307,27 +307,18 @@
         let productIndex = 1;
 
         function createTomSelect(selectElement) {
-
             const tom = new TomSelect(selectElement, {
-
                 valueField: 'id',
-
                 labelField: 'book_name',
-
                 searchField: [
                     'book_name',
                     'isbn',
                     'barcode_no'
                 ],
-
                 create: false,
-
                 preload: false,
-
                 maxOptions: 20,
-
                 placeholder: 'Search Product / ISBN / Barcode...',
-
                 loadThrottle: 100,
 
                 load: function(query, callback) {
@@ -380,27 +371,20 @@
                 },
 
                 onInitialize: function() {
-
                     const input = this.control_input;
-
                     input.addEventListener('keydown', (e) => {
-
                         if (e.key === 'Enter') {
                             e.preventDefault();
                         }
                     });
-
                     setTimeout(() => {
                         this.focus();
                     }, 100);
                 },
 
                 onItemAdd: function(value) {
-
                     const row = selectElement.closest('.product-row');
-
                     row.dataset.productId = value;
-
                     const selected = this.options[value];
 
                     // Product exists in stock_movements but current stock is 0
@@ -409,7 +393,6 @@
                         selected.available_stock !== undefined &&
                         parseFloat(selected.available_stock) <= 0
                     ) {
-
                         alert('This product is currently out of stock.');
 
                         // Remove the selected product from TomSelect
@@ -432,18 +415,24 @@
                     // Save maximum allowed discount on this row
                     row.dataset.maxDiscount = parseFloat(selected.disc_from_company || 0);
 
-                    // Set input max attribute
+                    // Set maximum allowed discount
                     const discountInput = row.querySelector('.discount-input');
-                    discountInput.max = row.dataset.maxDiscount;
+                    const maxDiscount = parseFloat(row.dataset.maxDiscount);
 
+                    discountInput.max = maxDiscount;
+
+                    // Set customer's discount without exceeding company discount
+                    let customerDiscount = parseFloat(selected.disc_for_customer || 0);
+                    if (customerDiscount > maxDiscount) {
+                        customerDiscount = maxDiscount;
+                    }
+                    discountInput.value = customerDiscount;
                     const qtyInput = row.querySelector('.quantity-input');
 
                     if (qtyInput) {
                         qtyInput.addEventListener('input', function() {
-
                             const availableStock = parseFloat(row.dataset.availableStock);
                             const quantity = parseFloat(this.value);
-
                             if (
                                 !isNaN(availableStock) &&
                                 !isNaN(quantity) &&
@@ -457,15 +446,11 @@
                     }
 
                     const priceInput = row.querySelector('.purchase-price');
-
                     const qty = parseFloat(qtyInput.value || 1);
-
                     const mrp = parseFloat(selected.mrp || 0);
 
                     priceInput.value = (qty * mrp).toFixed(2);
-
                     calculateRowAmount(row);
-
                     setTimeout(() => {
 
                         this.control_input.value = '';
@@ -474,68 +459,52 @@
 
                     }, 50);
                 }
+
             });
 
             selectElement.tomselect = tom;
-
             const row = selectElement.closest('.product-row');
-
             const editBtn = row.querySelector('.edit-product-btn');
 
             editBtn.addEventListener('click', function() {
-
                 const productId = row.dataset.productId;
-
                 if (!productId) {
                     alert('Please select product first');
                     return;
                 }
-
                 window.open(`/products/${productId}/edit?generate_barcode=1`, '_blank');
             });
 
             row.querySelector('.quantity-input')
                 .addEventListener('input', function() {
-
                     const product = tom.options[tom.getValue()];
-
                     if (!product) return;
-
                     const qty = parseFloat(this.value || 1);
-
                     const mrp = parseFloat(product.mrp || 0);
-
                     row.querySelector('.purchase-price').value =
                         (qty * mrp).toFixed(2);
-
                     calculateRowAmount(row);
                 });
 
             row.querySelector('.discount-input')
                 ?.addEventListener('input', function() {
-
                     const maxDiscount = parseFloat(row.dataset.maxDiscount || 0);
                     let value = parseFloat(this.value || 0);
-
                     if (value > maxDiscount) {
                         alert(`Maximum allowed discount is ${maxDiscount}%`);
                         value = maxDiscount;
                         this.value = maxDiscount;
                     }
-
                     if (value < 0) {
+                        value = 0;
                         this.value = 0;
                     }
-
                     calculateRowAmount(row);
-
                 });
 
             row.querySelector('.purchase-price')
                 .addEventListener('input', function() {
-
                     calculateRowAmount(row);
-
                 });
         }
 
@@ -544,11 +513,8 @@
             const mrp = parseFloat(
                 row.querySelector('.purchase-price')?.value || 0
             );
-
             const discountInput = row.querySelector('.discount-input');
-
             let discount = parseFloat(discountInput.value || 0);
-
             const maxDiscount = parseFloat(row.dataset.maxDiscount || 0);
 
             if (discount > maxDiscount) {
@@ -562,13 +528,9 @@
             }
 
             const netAmountInput = row.querySelector('.net_amount');
-
             const discountAmount = (mrp * discount) / 100;
-
             const netAmount = mrp - discountAmount;
-
             netAmountInput.value = Math.round(netAmount).toFixed(2);
-
             calculateTotal();
         }
 
@@ -580,32 +542,23 @@
         });
 
         document.addEventListener('DOMContentLoaded', function() {
-
             document.querySelectorAll('.product-select').forEach(select => {
-
                 createTomSelect(select);
-
             });
 
             setTimeout(() => {
-
                 const firstSelect =
                     document.querySelector('.product-select')?.tomselect;
-
                 if (firstSelect) {
                     firstSelect.focus();
                 }
-
             }, 200);
 
         });
 
         function addProductRow() {
-
             const container = document.getElementById('productRows');
-
             const row = document.createElement('div');
-
             row.className =
                 'product-row grid grid-cols-1 md:grid-cols-13 gap-3 items-end';
 
@@ -677,100 +630,107 @@
         `;
 
             container.appendChild(row);
-
             const newSelect = row.querySelector('.product-select');
-
             createTomSelect(newSelect);
-
             setTimeout(() => {
                 newSelect.tomselect.focus();
             }, 100);
-
             productIndex++;
         }
 
         function removeProductRow(button) {
-
             const rows = document.querySelectorAll('.product-row');
-
             if (rows.length === 1) {
                 return;
             }
-
             button.closest('.product-row').remove();
-
             calculateTotal();
         }
 
         function calculateTotal() {
-
             let total = 0;
-
             document.querySelectorAll('.net_amount').forEach(input => {
-
                 total += parseFloat(input.value || 0);
-
             });
-
             document.querySelector('input[name="total_amount"]').value = Math.round(total).toFixed(2);
         }
 
         window.addEventListener('storage', async function(event) {
+            if (event.key !== 'product_updated' || !event.newValue) return;
 
-            if (event.key !== 'product_updated') {
+            let data;
+
+            try {
+                data = JSON.parse(event.newValue);
+            } catch (e) {
+                console.error('Invalid product update event:', e);
                 return;
             }
 
-            const data = JSON.parse(event.newValue);
+            const productId = String(data.id);
 
-            const productId = data.id;
+            if (!productId) return;
 
-            document.querySelectorAll('.product-row').forEach(async row => {
+            const rows = document.querySelectorAll('.product-row');
 
-                if (row.dataset.productId != productId) {
-                    return;
-                }
+            for (const row of rows) {
+                if (String(row.dataset.productId) !== productId) continue;
 
                 try {
+                    const response = await fetch(
+                        `/products/${productId}/json`, {
+                            cache: 'no-store'
+                        }
+                    );
 
-                    const response = await fetch(`/products/${productId}/json`);
-
-                    const product = await response.json();
-
-                    row.dataset.maxDiscount = parseFloat(product.disc_from_company || 0);
-
-                    const discountInput = row.querySelector('.discount-input');
-                    discountInput.max = row.dataset.maxDiscount;
-
-                    if (parseFloat(discountInput.value || 0) > row.dataset.maxDiscount) {
-                        discountInput.value = row.dataset.maxDiscount;
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch updated product');
                     }
 
-                    const tomSelect =
-                        row.querySelector('.product-select').tomselect;
+                    const product = await response.json();
+                    const tomSelect = row.querySelector('.product-select').tomselect;
 
-                    tomSelect.clearOptions();
+                    // Update the cached product
+                    tomSelect.updateOption(String(product.id), product);
 
-                    tomSelect.addOption(product);
-
+                    // Update the selected product's display
+                    tomSelect.refreshItems();
                     tomSelect.refreshOptions(false);
 
-                    tomSelect.setValue(product.id, true);
+                    // Update the maximum company discount
+                    const maxDiscount = parseFloat(product.disc_from_company ?? 0);
 
-                    const qty =
-                        parseFloat(row.querySelector('.quantity-input').value || 1);
+                    row.dataset.maxDiscount = maxDiscount;
+
+                    const discountInput = row.querySelector('.discount-input');
+                    discountInput.max = maxDiscount;
+
+                    // Update the customer's discount
+                    let customerDiscount = parseFloat(product.disc_for_customer ?? 0);
+
+                    if (customerDiscount > maxDiscount) {
+                        customerDiscount = maxDiscount;
+                    }
+
+                    discountInput.value = Math.max(0, customerDiscount);
+
+                    // Update MRP using the existing quantity
+                    const quantity = parseFloat(
+                        row.querySelector('.quantity-input').value || 1
+                    );
+
+                    const mrp = parseFloat(product.mrp ?? 0);
 
                     row.querySelector('.purchase-price').value =
-                        (qty * parseFloat(product.mrp)).toFixed(2);
+                        (quantity * mrp).toFixed(2);
 
+                    // Recalculate amount and invoice total
                     calculateRowAmount(row);
 
                 } catch (e) {
-
-                    console.error(e);
-
+                    console.error('Product refresh failed:', e);
                 }
-            });
+            }
         });
     </script>
 </x-app-layout>

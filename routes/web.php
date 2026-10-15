@@ -70,6 +70,8 @@ Route::middleware('auth')->group(function () {
             'mrp' => $product->mrp,
             'isbn' => $product->isbn,
             'barcode_no' => $product->barcode_no,
+            'disc_from_company' => $product->disc_from_company,
+            'disc_for_customer' => $product->disc_for_customer,
         ]);
     });
 
@@ -92,7 +94,7 @@ Route::middleware('auth')->group(function () {
         '/stock-adjustments/purchase-search',
         [StockAdjustmentController::class, 'purchaseSearch']
     )->name('stock-adjustments.purchase-search');
-    
+
     Route::resource('stock-adjustments', StockAdjustmentController::class);
 
     Route::get('/reports', [StockMovementsController::class, 'index'])
