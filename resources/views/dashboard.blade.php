@@ -86,7 +86,8 @@
 
                                 <input type="date" name="sale_date" class="input input-bordered w-full"
                                     value="{{ auth()->user()->email == 'idealbooksale@gmail.com' ? old('sale_date') : now()->toDateString() }}"
-                                    {{ auth()->user()->email == 'idealbooksale@gmail.com' ? '' : 'readonly' }} required />
+                                    {{ auth()->user()->email == 'idealbooksale@gmail.com' ? '' : 'readonly' }}
+                                    required />
                             </div>
 
                             <div>
@@ -570,6 +571,13 @@
 
             calculateTotal();
         }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey && e.key.toLowerCase() === 'n') {
+                e.preventDefault();
+                addProductRow();
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', function() {
 

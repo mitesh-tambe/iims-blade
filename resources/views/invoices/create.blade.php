@@ -272,6 +272,13 @@
             });
         }
 
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey && e.key.toLowerCase() === 'n') {
+                e.preventDefault();
+                addProductRow();
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.product-select').forEach(select => {
                 createTomSelect(select);
