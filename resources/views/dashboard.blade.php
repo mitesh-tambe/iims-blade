@@ -429,10 +429,12 @@
                     discountInput.value = customerDiscount;
                     const qtyInput = row.querySelector('.quantity-input');
 
+
                     if (qtyInput) {
                         qtyInput.addEventListener('input', function() {
                             const availableStock = parseFloat(row.dataset.availableStock);
                             const quantity = parseFloat(this.value);
+
                             if (
                                 !isNaN(availableStock) &&
                                 !isNaN(quantity) &&
@@ -441,9 +443,23 @@
                                 alert(`Only ${availableStock} quantity is available in stock.`);
 
                                 this.value = availableStock;
+
+                                // Recalculate MRP and amount using the corrected quantity
+                                const priceInput = row.querySelector('.purchase-price');
+                                const selected = this.closest('.product-row')
+                                    .querySelector('.product-select')
+                                    ?.tomselect?.options[row.dataset.productId];
+
+                                if (selected && priceInput) {
+                                    const mrp = parseFloat(selected.mrp || 0);
+                                    priceInput.value = (availableStock * mrp).toFixed(2);
+                                }
+
+                                calculateRowAmount(row);
                             }
                         });
                     }
+
 
                     const priceInput = row.querySelector('.purchase-price');
                     const qty = parseFloat(qtyInput.value || 1);
