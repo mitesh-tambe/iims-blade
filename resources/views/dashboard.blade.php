@@ -671,6 +671,7 @@
             document.querySelector('input[name="total_amount"]').value = Math.round(total).toFixed(2);
         }
 
+
         window.addEventListener('storage', async function(event) {
             if (event.key !== 'product_updated' || !event.newValue) return;
 
@@ -683,65 +684,66 @@
                 return;
             }
 
-            const productId = String(data.id);
+            const productId = String(data.id || '');
 
             if (!productId) return;
 
             const rows = document.querySelectorAll('.product-row');
 
             for (const row of rows) {
-                if (String(row.dataset.productId) !== productId) continue;
+                if (String(row.dataset.productId || '') !== productId) continue;
 
                 try {
                     const response = await fetch(
-                        `/products/${productId}/json`, {
+                        `/products/${encodeURIComponent(productId)}/json?t=${Date.now()}`, {
                             cache: 'no-store'
                         }
                     );
 
                     if (!response.ok) {
-                        throw new Error('Failed to fetch updated product');
+                        throw new Error(`Product request failed: ${response.status}`);
                     }
 
                     const product = await response.json();
-                    const tomSelect = row.querySelector('.product-select').tomselect;
+                    const select = row.querySelector('.product-select');
+                    const tomSelect = select?.tomselect;
 
-                    // Update the cached product
+                    if (!tomSelect) {
+                        console.error('TomSelect instance not found.');
+                        continue;
+                    }
+
+                    // Replace the cached product with the latest server values.
                     tomSelect.updateOption(String(product.id), product);
 
-                    // Update the selected product's display
-                    tomSelect.refreshItems();
-                    tomSelect.refreshOptions(false);
-
-                    // Update the maximum company discount
                     const maxDiscount = parseFloat(product.disc_from_company ?? 0);
-
                     row.dataset.maxDiscount = maxDiscount;
 
                     const discountInput = row.querySelector('.discount-input');
                     discountInput.max = maxDiscount;
 
-                    // Update the customer's discount
                     let customerDiscount = parseFloat(product.disc_for_customer ?? 0);
+                    customerDiscount = Math.max(0, Math.min(customerDiscount, maxDiscount));
+                    discountInput.value = customerDiscount;
 
-                    if (customerDiscount > maxDiscount) {
-                        customerDiscount = maxDiscount;
-                    }
-
-                    discountInput.value = Math.max(0, customerDiscount);
-
-                    // Update MRP using the existing quantity
+                    // Recalculate MRP using the current quantity.
                     const quantity = parseFloat(
-                        row.querySelector('.quantity-input').value || 1
+                        row.querySelector('.quantity-input')?.value || 1
                     );
 
                     const mrp = parseFloat(product.mrp ?? 0);
-
                     row.querySelector('.purchase-price').value =
                         (quantity * mrp).toFixed(2);
 
-                    // Recalculate amount and invoice total
+                    // Recalculate row amount and bill total.
                     calculateRowAmount(row);
+
+                    console.log('Product refreshed successfully:', {
+                        id: product.id,
+                        mrp: product.mrp,
+                        disc_from_company: product.disc_from_company,
+                        disc_for_customer: product.disc_for_customer
+                    });
 
                 } catch (e) {
                     console.error('Product refresh failed:', e);
