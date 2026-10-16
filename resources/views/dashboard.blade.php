@@ -492,15 +492,41 @@
             });
 
             row.querySelector('.quantity-input')
-                .addEventListener('input', function() {
-                    const product = tom.options[tom.getValue()];
-                    if (!product) return;
-                    const qty = parseFloat(this.value || 1);
-                    const mrp = parseFloat(product.mrp || 0);
-                    row.querySelector('.purchase-price').value =
-                        (qty * mrp).toFixed(2);
-                    calculateRowAmount(row);
+                .addEventListener('input', async function() {
+                    const productId = row.dataset.productId;
+                    if (!productId) return;
+
+                    try {
+                        const response = await fetch(
+                            `/products/${encodeURIComponent(productId)}/json?t=${Date.now()}`, {
+                                cache: 'no-store'
+                            }
+                        );
+
+                        if (!response.ok) {
+                            throw new Error(`Product request failed: ${response.status}`);
+                        }
+
+                        const product = await response.json();
+
+                        // Update TomSelect with the latest product data.
+                        tom.updateOption(String(product.id), {
+                            ...tom.options[String(product.id)],
+                            ...product
+                        });
+
+                        const qty = parseFloat(this.value || 1);
+                        const mrp = parseFloat(product.mrp || 0);
+
+                        row.querySelector('.purchase-price').value =
+                            (qty * mrp).toFixed(2);
+
+                        calculateRowAmount(row);
+                    } catch (error) {
+                        console.error('Failed to refresh product during quantity change:', error);
+                    }
                 });
+
 
             row.querySelector('.discount-input')
                 ?.addEventListener('input', function() {
@@ -672,84 +698,102 @@
         }
 
 
-        window.addEventListener('storage', async function(event) {
-            if (event.key !== 'product_updated' || !event.newValue) return;
+        async function refreshProductRow(row) {
+            const productId = String(row.dataset.productId || '');
+            if (!productId || row.dataset.refreshing === 'true') return;
 
-            let data;
+            row.dataset.refreshing = 'true';
 
             try {
-                data = JSON.parse(event.newValue);
-            } catch (e) {
-                console.error('Invalid product update event:', e);
-                return;
-            }
-
-            const productId = String(data.id || '');
-
-            if (!productId) return;
-
-            const rows = document.querySelectorAll('.product-row');
-
-            for (const row of rows) {
-                if (String(row.dataset.productId || '') !== productId) continue;
-
-                try {
-                    const response = await fetch(
-                        `/products/${encodeURIComponent(productId)}/json?t=${Date.now()}`, {
-                            cache: 'no-store'
-                        }
-                    );
-
-                    if (!response.ok) {
-                        throw new Error(`Product request failed: ${response.status}`);
+                const response = await fetch(
+                    `/products/${encodeURIComponent(productId)}/json?t=${Date.now()}`, {
+                        cache: 'no-store'
                     }
+                );
 
-                    const product = await response.json();
-                    const select = row.querySelector('.product-select');
-                    const tomSelect = select?.tomselect;
-
-                    if (!tomSelect) {
-                        console.error('TomSelect instance not found.');
-                        continue;
-                    }
-
-                    // Replace the cached product with the latest server values.
-                    tomSelect.updateOption(String(product.id), product);
-                    tomSelect.refreshOptions(false);
-
-                    const maxDiscount = parseFloat(product.disc_from_company ?? 0);
-                    row.dataset.maxDiscount = maxDiscount;
-
-                    const discountInput = row.querySelector('.discount-input');
-                    discountInput.max = maxDiscount;
-
-                    let customerDiscount = parseFloat(product.disc_for_customer ?? 0);
-                    customerDiscount = Math.max(0, Math.min(customerDiscount, maxDiscount));
-                    discountInput.value = customerDiscount;
-
-                    // Recalculate MRP using the current quantity.
-                    const quantity = parseFloat(
-                        row.querySelector('.quantity-input')?.value || 1
-                    );
-
-                    const mrp = parseFloat(product.mrp ?? 0);
-                    row.querySelector('.purchase-price').value =
-                        (quantity * mrp).toFixed(2);
-
-                    // Recalculate row amount and bill total.
-                    calculateRowAmount(row);
-
-                    console.log('Product refreshed successfully:', {
-                        id: product.id,
-                        mrp: product.mrp,
-                        disc_from_company: product.disc_from_company,
-                        disc_for_customer: product.disc_for_customer
-                    });
-
-                } catch (e) {
-                    console.error('Product refresh failed:', e);
+                if (!response.ok) {
+                    throw new Error(`Product request failed: ${response.status}`);
                 }
+
+                const product = await response.json();
+                const select = row.querySelector('.product-select');
+                const tomSelect = select?.tomselect;
+
+                if (!tomSelect) return;
+
+                const key = String(product.id);
+                const previous = tomSelect.options[key] || {};
+
+                const changed =
+                    String(previous.mrp ?? '') !== String(product.mrp ?? '') ||
+                    String(previous.disc_from_company ?? '') !== String(product.disc_from_company ?? '') ||
+                    String(previous.disc_for_customer ?? '') !== String(product.disc_for_customer ?? '');
+
+                tomSelect.updateOption(key, {
+                    ...previous,
+                    ...product
+                });
+
+                if (!changed) return;
+
+                row.dataset.maxDiscount = parseFloat(product.disc_from_company ?? 0);
+
+                const discountInput = row.querySelector('.discount-input');
+                const maxDiscount = parseFloat(row.dataset.maxDiscount);
+
+                discountInput.max = maxDiscount;
+
+                let customerDiscount = parseFloat(product.disc_for_customer ?? 0);
+                customerDiscount = Math.max(0, Math.min(customerDiscount, maxDiscount));
+                discountInput.value = customerDiscount;
+
+                const quantity = parseFloat(
+                    row.querySelector('.quantity-input')?.value || 1
+                );
+
+                row.querySelector('.purchase-price').value =
+                    (quantity * parseFloat(product.mrp ?? 0)).toFixed(2);
+
+                calculateRowAmount(row);
+
+                console.log('Product automatically refreshed:', {
+                    id: product.id,
+                    mrp: product.mrp,
+                    disc_from_company: product.disc_from_company,
+                    disc_for_customer: product.disc_for_customer
+                });
+            } catch (error) {
+                console.error('Product refresh failed:', error);
+            } finally {
+                delete row.dataset.refreshing;
+            }
+        }
+
+        // Continue supporting the existing cross-tab update event.
+        window.addEventListener('storage', function(event) {
+            if (event.key !== 'product_updated' || !event.newValue) return;
+
+            try {
+                const data = JSON.parse(event.newValue);
+                const productId = String(data.id || '');
+
+                document.querySelectorAll('.product-row').forEach(row => {
+                    if (String(row.dataset.productId || '') === productId) {
+                        refreshProductRow(row);
+                    }
+                });
+            } catch (error) {
+                console.error('Invalid product update event:', error);
             }
         });
+
+        // Automatically check selected products for changes.
+        setInterval(() => {
+            document.querySelectorAll('.product-row').forEach(row => {
+                if (row.dataset.productId) {
+                    refreshProductRow(row);
+                }
+            });
+        }, 3000);
     </script>
 </x-app-layout>
