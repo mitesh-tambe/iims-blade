@@ -715,6 +715,7 @@
 
                     // Replace the cached product with the latest server values.
                     tomSelect.updateOption(String(product.id), product);
+                    tomSelect.refreshOptions(false);
 
                     const maxDiscount = parseFloat(product.disc_from_company ?? 0);
                     row.dataset.maxDiscount = maxDiscount;
